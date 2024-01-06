@@ -217,7 +217,10 @@ public class Monster : MonoBehaviour
     private void OnMouseOver()
     {
         if (isDead == false)
-            Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
+        {
+            if (Player.Instance.equipedWeapon.isMelee) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
+            if (Player.Instance.equipedWeapon.isRange) Cursor.SetCursor(CustomCursor.Instance.cursorRangeAttack, Vector2.zero, CursorMode.Auto);
+        }
         // Show monster name on right click
         if (Input.GetMouseButtonDown(1))
         {
