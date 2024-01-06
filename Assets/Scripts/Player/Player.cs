@@ -76,7 +76,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     private bool attackSuccess;
 
     // Items
-    public Weapon equipedWeapon;
+    public Weapon weapon;
     public Item item;
 
     // Colliders & Transparency Objects Distance
@@ -124,13 +124,21 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             {
                 if (playerItems[i].activeSelf == true)
                 {
-                    equipedWeapon = playerItems[i].GetComponent<Weapon>();
-                    if (equipedWeapon != null)
-                    {
-                        item = playerItems[i].GetComponent<Item>();
-                        item.equipped = true;
-                    }
+                    weapon = playerItems[i].GetComponent<Weapon>();
 
+                    // This item is a weapon
+                    if (weapon != null)
+                    {
+                        // If the weapon is active in one of the hands, we define the item as equipped
+                        if (weapon.transform.parent != null)
+                        {
+                            if (weapon.transform.parent.name == "RIGHT_HAND_COMBAT" || weapon.transform.parent.name == "LEFT_HAND_COMBAT" && weapon.gameObject.activeSelf == true)
+                            {
+                                item = playerItems[i].GetComponent<Item>();
+                                item.equipped = true;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -248,6 +256,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Thes conditions matches with ContinueMoveItem in Update()
         hit.collider.TryGetComponent(out Item target);
         targetItem = target;
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetItem.transform.position - transform.position), 1);
     }
 
     public void ContinueToMoveToItem()
@@ -262,7 +271,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     {
 
         // Monster isnt in range, player is moving until being in range
-        if (Vector3.Distance(transform.position, targetMonster.transform.position) > equipedWeapon.range)
+        if (Vector3.Distance(transform.position, targetMonster.transform.position) > weapon.range)
         {
             moveToTarget = true;
             animator.SetBool("run", true);
@@ -271,7 +280,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         }
 
         // Attack confirms the object is a monster and in range
-        if (Vector3.Distance(transform.position, targetMonster.transform.position) <= equipedWeapon.range && targetMonster.currentHealth > 0)
+        if (Vector3.Distance(transform.position, targetMonster.transform.position) <= weapon.range && targetMonster.currentHealth > 0)
         {
             // Transform rotation to prepair player to shot forward being tuned in monster direction
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetMonster.transform.position - transform.position), 1);
@@ -282,7 +291,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
             // Check if ray simulating attack is colliding something
             RaycastHit hit;
-            if (Physics.Raycast(equipedWeapon.transform.position, (targetMonster.transform.position - transform.position), out hit, equipedWeapon.range))
+            if (Physics.Raycast(transform.position, (targetMonster.transform.position - transform.position), out hit, weapon.range))
             {
                 // If we collid something that is not the monster, attack is cancel, IA turn's on to move until being in a angle letting player shot
                 if (!hit.collider.gameObject.CompareTag("Monster"))
@@ -306,7 +315,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             if (Time.time > nextAttack && agent.isStopped == true)
             {
                 ApplyAttack();
-                nextAttack = Time.time + equipedWeapon.frequency;
+                nextAttack = Time.time + weapon.frequency;
             }
         }
 
@@ -329,8 +338,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Target Monster is dead, reset target
         if (targetMonster.currentHealth <= 0 || targetMonster.isDead == true)
         {
-            if (equipedWeapon.isMelee) animator.SetBool("meleeAttack", false);
-            if (equipedWeapon.isRange) animator.SetBool("rangeAttack", false);
+            if (weapon.isMelee) animator.SetBool("meleeAttack", false);
+            if (weapon.isRange) animator.SetBool("rangeAttack", false);
             targetMonster.isDead = true;
             targetMonster = null;
         }
@@ -342,8 +351,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 1);
             Camera.main.transform.rotation = cameraRotation;
 
-            if (equipedWeapon.isMelee) attackSuccess = Random.Range(1, attack) >= Random.Range(1, targetMonster.dodge);
-            if (equipedWeapon.isRange) attackSuccess = Random.Range(1, archery) >= Random.Range(1, targetMonster.dodge);
+            if (weapon.isMelee) attackSuccess = Random.Range(1, attack) >= Random.Range(1, targetMonster.dodge);
+            if (weapon.isRange) attackSuccess = Random.Range(1, archery) >= Random.Range(1, targetMonster.dodge);
 
             if (attackSuccess)
             {
@@ -441,12 +450,12 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     {
         canAttack = false;
         canMove = false;
-        if (equipedWeapon.isMelee) animator.SetBool("meleeAttack", true);
-        if (equipedWeapon.isRange) animator.SetBool("rangeAttack", true);
-        damage = Random.Range(equipedWeapon.damageMin, equipedWeapon.damageMax) + equipedWeapon.damageFix;
-        yield return new WaitForSeconds(equipedWeapon.frequency / 2); // Collision is usually on middle of anim, frequency shot by 2 should be match
+        if (weapon.isMelee) animator.SetBool("meleeAttack", true);
+        if (weapon.isRange) animator.SetBool("rangeAttack", true);
+        damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix;
+        yield return new WaitForSeconds(weapon.frequency / 2); // Collision is usually on middle of anim, frequency shot by 2 should be match
         // Arrow Success Attack Move
-        if (equipedWeapon.isRange)
+        if (weapon.isRange)
         {
             GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
             projectile.OnBowShootingArrowSuccess(targetMonster);
@@ -462,11 +471,11 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     {
         canAttack = false;
         canMove = false;
-        if (equipedWeapon.isMelee) animator.SetBool("meleeAttack", true);
-        if (equipedWeapon.isRange) animator.SetBool("rangeAttack", true);
-        yield return new WaitForSeconds(equipedWeapon.frequency / 2); // to do, weapon delay in ms to pass a parameter and use instead of 1
+        if (weapon.isMelee) animator.SetBool("meleeAttack", true);
+        if (weapon.isRange) animator.SetBool("rangeAttack", true);
+        yield return new WaitForSeconds(weapon.frequency / 2); // to do, weapon delay in ms to pass a parameter and use instead of 1
         // Arrow Fail Attack Move
-        if (equipedWeapon.isRange)
+        if (weapon.isRange)
         {
             GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
             projectile.OnBowShootingArrowFail(targetMonster);
@@ -477,7 +486,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     IEnumerator IHitSuccessShowDamage()
     {
-        yield return new WaitForSeconds(equipedWeapon.frequency / 2);
+        yield return new WaitForSeconds(weapon.frequency / 2);
         // Show UI Damage
         DynamicTextData data = targetMonster.damageTextData;
         Vector3 destination = targetMonster.transform.position;
@@ -490,7 +499,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     IEnumerator IHitFailShowDodge()
     {
-        yield return new WaitForSeconds(equipedWeapon.frequency / 2);
+        yield return new WaitForSeconds(weapon.frequency / 2);
         // Show UI Damage
         DynamicTextData data = targetMonster.damageTextData;
         Vector3 destination = targetMonster.transform.position;

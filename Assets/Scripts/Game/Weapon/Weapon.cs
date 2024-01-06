@@ -14,5 +14,4 @@ public class Weapon : MonoBehaviour
     public int requiredDexterity;
     public int requiredWisdom;
     public int requiredIntelect;
-
 }

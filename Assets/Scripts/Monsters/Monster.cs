@@ -218,8 +218,8 @@ public class Monster : MonoBehaviour
     {
         if (isDead == false)
         {
-            if (Player.Instance.equipedWeapon.isMelee) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
-            if (Player.Instance.equipedWeapon.isRange) Cursor.SetCursor(CustomCursor.Instance.cursorRangeAttack, Vector2.zero, CursorMode.Auto);
+            if (Player.Instance.weapon.isMelee) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
+            if (Player.Instance.weapon.isRange) Cursor.SetCursor(CustomCursor.Instance.cursorRangeAttack, Vector2.zero, CursorMode.Auto);
         }
         // Show monster name on right click
         if (Input.GetMouseButtonDown(1))
@@ -235,7 +235,7 @@ public class Monster : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // If trigger is a projectile we destroy it
-        if (Player.Instance.equipedWeapon.isRange && other.gameObject.tag == "Projectile")
+        if (Player.Instance.weapon.isRange && other.gameObject.tag == "Projectile")
             Destroy(GameObject.Find(other.name));
 
         // If the monster is hitted by outranged, aggro go on
