@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: cc7ad4dc3b2039244990173b1c9b1f8e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cursorDefault: {fileID: 2800000, guid: 902e11932794a86418fa8895e5575fbd, type: 3}
+  - cursorTop: {fileID: 2800000, guid: 0acdd20b123887346aba9e0b6f7bc7ac, type: 3}
+  - cursorTopRight: {fileID: 2800000, guid: 13eeb584cfbf76a4b869687e44b177fa, type: 3}
+  - cursorRight: {fileID: 2800000, guid: db0b69a3b6c6528429390d21188e6b3b, type: 3}
+  - cursorBottomRight: {fileID: 2800000, guid: fc9e9d509374e064a978b6a3495c6c60, type: 3}
+  - cursorBottom: {fileID: 2800000, guid: 021e7b842dbe54747bb7bc6183fe5ed1, type: 3}
+  - cursorBottomLeft: {fileID: 2800000, guid: f42d12980a005b7478e6aefea760fcae, type: 3}
+  - cursorLeft: {fileID: 2800000, guid: b4e5db224a6d28e4991c65be5e9795c3, type: 3}
+  - cursorTopLeft: {fileID: 2800000, guid: e99bafd4892ff3e4cb8bff16713f4343, type: 3}
+  - cursorMeleeAttack: {fileID: 2800000, guid: 806ef999300e8824198c0b10624f0003, type: 3}
+  - cursorRangeAttack: {fileID: 2800000, guid: bd776ba0b49323b408d5cb8b9c04a274, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
