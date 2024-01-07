@@ -53,7 +53,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     // Moves & Attack
     public CharacterController characterController;
     public Animator animator;
-
+    public GameObject hands;
     public Vector3 directionKeyboard;
     public Vector3 directionMouse;
     public bool moveToTarget;
@@ -104,6 +104,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         agent = GetComponent<NavMeshAgent>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        hands = GameObject.Find("Punch");
 
     }
 
@@ -136,11 +137,20 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
                             {
                                 item = playerItems[i].GetComponent<Item>();
                                 item.equipped = true;
+
+                                // Since we have a real weapon equip, we disable punch hands fake one
+                                hands.SetActive(false);
                             }
                         }
                     }
                 }
             }
+        }
+        // No real weapon is equiped, player gonna punch with hands
+        if (weapon == null)
+        {
+            hands.SetActive(true);
+            weapon = hands.GetComponent<Weapon>();
         }
     }
 
@@ -176,6 +186,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         isAttacking = false;
         animator.SetBool("meleeAttack", false);
         animator.SetBool("rangeAttack", false);
+        animator.SetBool("handAttack", false);
         animator.SetBool("run", false);
     }
 
@@ -190,6 +201,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             if (!Physics.Raycast(transform.position, transform.TransformDirection(directionKeyboard), _colliderDistance))
             {
                 // Run Animation On
+                animator.SetBool("handAttack", false);
                 animator.SetBool("meleeAttack", false);
                 animator.SetBool("rangeAttack", false);
                 animator.SetBool("run", true);
@@ -269,7 +281,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void ContinueAttack()
     {
-
         // Monster isnt in range, player is moving until being in range
         if (Vector3.Distance(transform.position, targetMonster.transform.position) > weapon.range)
         {
@@ -338,8 +349,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Target Monster is dead, reset target
         if (targetMonster.currentHealth <= 0 || targetMonster.isDead == true)
         {
-            if (weapon.isMelee) animator.SetBool("meleeAttack", false);
-            if (weapon.isRange) animator.SetBool("rangeAttack", false);
+            animator.SetBool("handAttack", false);
+            animator.SetBool("meleeAttack", false);
+            animator.SetBool("rangeAttack", false);
             targetMonster.isDead = true;
             targetMonster = null;
         }
@@ -351,6 +363,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 1);
             Camera.main.transform.rotation = cameraRotation;
 
+            if (weapon.isHand) attackSuccess = Random.Range(1, attack) >= Random.Range(1, targetMonster.dodge);
             if (weapon.isMelee) attackSuccess = Random.Range(1, attack) >= Random.Range(1, targetMonster.dodge);
             if (weapon.isRange) attackSuccess = Random.Range(1, archery) >= Random.Range(1, targetMonster.dodge);
 
@@ -420,6 +433,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
                     // Run Animation On
                     animator.SetBool("meleeAttack", false);
                     animator.SetBool("rangeAttack", false);
+                    animator.SetBool("handAttack", false);
                     animator.SetBool("run", true);
                     // Move to none collider position
                     transform.Translate(directionMouse * (_speed * Time.deltaTime));
@@ -450,6 +464,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     {
         canAttack = false;
         canMove = false;
+        if (weapon.isHand) animator.SetBool("handAttack", true);
         if (weapon.isMelee) animator.SetBool("meleeAttack", true);
         if (weapon.isRange) animator.SetBool("rangeAttack", true);
         damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix;

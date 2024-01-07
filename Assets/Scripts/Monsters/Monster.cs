@@ -218,6 +218,7 @@ public class Monster : MonoBehaviour
     {
         if (isDead == false)
         {
+            if (Player.Instance.weapon.isHand) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
             if (Player.Instance.weapon.isMelee) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
             if (Player.Instance.weapon.isRange) Cursor.SetCursor(CustomCursor.Instance.cursorRangeAttack, Vector2.zero, CursorMode.Auto);
         }

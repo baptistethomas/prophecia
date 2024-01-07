@@ -97,8 +97,10 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             var childCound = rightHand.transform.childCount;
             for (int i = 0; i < childCound; i++)
             {
+                // A bit different of left hand, cuz right hand could be punch weapon without item component
                 var rightHandWeapon = rightHand.transform.GetChild(i);
-                if (rightHandWeapon.GetComponent<Item>().id == slotGameObject.GetComponent<Item>().id)
+                var rightHandWeaponItem = rightHandWeapon.GetComponent<Item>();
+                if (rightHandWeaponItem && rightHandWeaponItem.id == slotGameObject.GetComponent<Item>().id)
                 {
                     rightHandWeapon.gameObject.SetActive(true);
                     Player.Instance.weapon = slotGameObject.GetComponent<Weapon>();

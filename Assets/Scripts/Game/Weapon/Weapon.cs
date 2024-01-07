@@ -9,6 +9,7 @@ public class Weapon : MonoBehaviour
     public float frequency;
     public bool isMelee;
     public bool isRange;
+    public bool isHand;
     public int requiredStrenght;
     public int requiredEndurance;
     public int requiredDexterity;
