@@ -510,26 +510,34 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     IEnumerator IHitSuccessShowDamage()
     {
         yield return new WaitForSeconds(weapon.frequency / 2);
-        // Show UI Damage
-        DynamicTextData data = targetMonster.damageTextData;
-        Vector3 destination = targetMonster.transform.position;
-        destination.x += (Random.value + 0.5f) / 3;
-        destination.y += (Random.value + 5) / 3;
-        destination.z += (Random.value - 0.5f) / 3;
+        // Is target monster still available after delay ?
+        if (targetMonster != null)
+        {
+            // Show UI Damage
+            DynamicTextData data = targetMonster.damageTextData;
+            Vector3 destination = targetMonster.transform.position;
+            destination.x += (Random.value + 0.5f) / 3;
+            destination.y += (Random.value + 5) / 3;
+            destination.z += (Random.value - 0.5f) / 3;
 
-        DynamicTextManager.CreateText(destination, damage.ToString(), data);
+            DynamicTextManager.CreateText(destination, damage.ToString(), data);
+        }
     }
 
     IEnumerator IHitFailShowDodge()
     {
         yield return new WaitForSeconds(weapon.frequency / 2);
-        // Show UI Damage
-        DynamicTextData data = targetMonster.damageTextData;
-        Vector3 destination = targetMonster.transform.position;
-        destination.x += (Random.value + 0.5f) / 3;
-        destination.y += (Random.value + 5) / 3;
-        destination.z += (Random.value - 0.5f) / 3;
+        // Is target monster still available after delay ?
+        if (targetMonster != null)
+        {
+            // Show UI Damage
+            DynamicTextData data = targetMonster.damageTextData;
+            Vector3 destination = targetMonster.transform.position;
+            destination.x += (Random.value + 0.5f) / 3;
+            destination.y += (Random.value + 5) / 3;
+            destination.z += (Random.value - 0.5f) / 3;
 
-        DynamicTextManager.CreateText(destination, "Dodged!", data);
+            DynamicTextManager.CreateText(destination, "Dodged!", data);
+        }
     }
 }

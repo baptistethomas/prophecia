@@ -39,6 +39,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             putAwayRightHand();
             equipLeftHandWeapon();
             equipRightHandWeapon();
+            Player.Instance.resetTarget();
         }
         else
         {
