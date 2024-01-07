@@ -37,6 +37,15 @@ public class Inventory : MonoBehaviour
 
         if (inventoryEnabled == true)
         {
+            for (int i = 0; i < allSlots; i++)
+            {
+                if (slot[i].transform.Find("Count"))
+                {
+                    int countItem = slot[i].transform.childCount - 2;
+                    if (countItem > 0) slot[i].transform.Find("Count").GetComponent<TMPro.TextMeshProUGUI>().text = countItem.ToString();
+                }
+            }
+
             inventory.SetActive(true);
             characterStats.SetActive(true);
         }
@@ -53,7 +62,7 @@ public class Inventory : MonoBehaviour
         for (int i = 0; i < allSlots; i++)
         {
 
-            if (slot[i].GetComponent<Slot>().empty)
+            if (slot[i].GetComponent<Slot>().empty || slot[i].GetComponent<Slot>().id == itemId)
             {
                 // Add Item
                 itemObject.GetComponent<Item>().pickedUp = true;

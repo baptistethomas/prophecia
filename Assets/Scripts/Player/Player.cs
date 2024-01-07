@@ -188,6 +188,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         animator.SetBool("rangeAttack", false);
         animator.SetBool("handAttack", false);
         animator.SetBool("run", false);
+        Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
     }
 
     private void keyboardMoveManager()

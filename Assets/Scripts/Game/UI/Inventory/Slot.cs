@@ -34,7 +34,8 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         // Equip Item on double click inventory slot
         if ((lastClick + interval) > Time.time)
         {
-            slotGameObject = transform.GetChild(1).gameObject;
+            // Last slot child
+            slotGameObject = transform.GetChild(transform.childCount - 1).gameObject;
             putAwayLeftHand();
             putAwayRightHand();
             equipLeftHandWeapon();
