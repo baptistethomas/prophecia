@@ -14,7 +14,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     public Sprite icon;
 
     private float lastClick = 0;
-    private float interval = 0.4f;
+    private float interval = 0.5f;
     private GameObject slotGameObject;
     private GameObject leftHand;
     private GameObject rightHand;

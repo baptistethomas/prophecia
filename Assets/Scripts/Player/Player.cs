@@ -469,15 +469,19 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (weapon.isRange) animator.SetBool("rangeAttack", true);
         damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix;
         yield return new WaitForSeconds(weapon.frequency / 2); // Collision is usually on middle of anim, frequency shot by 2 should be match
-        // Arrow Success Attack Move
-        if (weapon.isRange)
+        // Is target monster still available after delay ?
+        if (targetMonster != null)
         {
-            GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
-            projectile.OnBowShootingArrowSuccess(targetMonster);
+            // Arrow Success Attack Move
+            if (weapon.isRange)
+            {
+                GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
+                projectile.OnBowShootingArrowSuccess(targetMonster);
+            }
+            targetMonster.currentHealth -= damage;
+            if (targetMonster && targetMonster.isDead == false) goHitParticles = Instantiate(hitParticles, new Vector3(targetMonster.transform.position.x, targetMonster.transform.position.y + 1, targetMonster.transform.position.z), Quaternion.identity);
+            if (targetMonster && targetMonster.isDead == false) Destroy(goHitParticles, 2);
         }
-        targetMonster.currentHealth -= damage;
-        if (targetMonster && targetMonster.isDead == false) goHitParticles = Instantiate(hitParticles, new Vector3(targetMonster.transform.position.x, targetMonster.transform.position.y + 1, targetMonster.transform.position.z), Quaternion.identity);
-        if (targetMonster && targetMonster.isDead == false) Destroy(goHitParticles, 2);
         canAttack = true;
         canMove = true;
     }
@@ -489,11 +493,15 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (weapon.isMelee) animator.SetBool("meleeAttack", true);
         if (weapon.isRange) animator.SetBool("rangeAttack", true);
         yield return new WaitForSeconds(weapon.frequency / 2); // to do, weapon delay in ms to pass a parameter and use instead of 1
-        // Arrow Fail Attack Move
-        if (weapon.isRange)
+        // Is target monster still available after delay ?
+        if (targetMonster != null)
         {
-            GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
-            projectile.OnBowShootingArrowFail(targetMonster);
+            // Arrow Fail Attack Move
+            if (weapon.isRange)
+            {
+                GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
+                projectile.OnBowShootingArrowFail(targetMonster);
+            }
         }
         canAttack = true;
         canMove = true;
