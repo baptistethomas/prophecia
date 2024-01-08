@@ -585,7 +585,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             destination.y += (Random.value + 5) / 3;
             destination.z += (Random.value - 0.5f) / 3;
 
-            DynamicTextManager.CreateText(destination, damage.ToString(), data);
+            DynamicTextManager.CreateText(destination, "-" + damage.ToString(), data);
         }
     }
 

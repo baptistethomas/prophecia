@@ -66,23 +66,23 @@ public class Inventory : MonoBehaviour
     {
         GameObject strenght = GameObject.Find("Strenght");
         strenght.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
-            Player.Instance.strenghtFinal.ToString() + "/" + Player.Instance.strenght.ToString();
+            Player.Instance.strenghtFinal.ToString();
 
         GameObject endurance = GameObject.Find("Endurance");
         endurance.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
-            Player.Instance.enduranceFinal.ToString() + "/" + Player.Instance.endurance.ToString();
+            Player.Instance.enduranceFinal.ToString();
 
         GameObject dexterity = GameObject.Find("Dexterity");
         dexterity.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
-            Player.Instance.dexterityFinal.ToString() + "/" + Player.Instance.dexterity.ToString();
+            Player.Instance.dexterityFinal.ToString();
 
         GameObject intelect = GameObject.Find("Intelect");
         intelect.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
-            Player.Instance.intelectFinal.ToString() + "/" + Player.Instance.intelect.ToString();
+            Player.Instance.intelectFinal.ToString();
 
         GameObject wisdom = GameObject.Find("Wisdom");
         wisdom.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
-            Player.Instance.wisdomFinal.ToString() + "/" + Player.Instance.wisdom.ToString();
+            Player.Instance.wisdomFinal.ToString();
     }
 
     public void AddItem(GameObject itemObject, int itemId, string itemType, string itemDescription, Sprite itemIcon)

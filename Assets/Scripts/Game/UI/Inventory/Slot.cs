@@ -54,8 +54,13 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         var childCound = leftHand.transform.childCount;
         for (int i = 0; i < childCound; i++)
         {
+            // Left hand is equiped
             var leftHandWeapon = leftHand.transform.GetChild(i);
             leftHandWeapon.gameObject.SetActive(false);
+
+            // Disable the right hand slot on character inventory
+            GameObject leftHandSlot = GameObject.Find("Left Hand");
+            leftHandSlot.transform.GetChild(1).gameObject.SetActive(false);
         }
     }
 
@@ -70,9 +75,18 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                 var leftHandWeapon = leftHand.transform.GetChild(i);
                 if (leftHandWeapon.GetComponent<Item>().id == slotGameObject.GetComponent<Item>().id)
                 {
+                    // Left hand is equiped
                     leftHandWeapon.gameObject.SetActive(true);
                     Player.Instance.weapon = slotGameObject.GetComponent<Weapon>();
                     leftHandWeapon.GetComponent<Item>().equipped = true;
+
+                    // Activate the right hand slot on character inventory
+                    GameObject leftHandSlot = GameObject.Find("Left Hand");
+                    leftHandSlot.transform.GetChild(1).gameObject.SetActive(true);
+                    leftHandSlot.transform.GetChild(1).GetComponent<Image>().sprite = icon;
+
+                    // Clean slot
+                    gameObject.SetActive(false);
                 }
             }
         }
@@ -84,8 +98,13 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         var childCound = rightHand.transform.childCount;
         for (int i = 0; i < childCound; i++)
         {
+            // Put away weapon in right hand
             var rightHandWeapon = rightHand.transform.GetChild(i);
             rightHandWeapon.gameObject.SetActive(false);
+
+            // Disable the right hand slot on character inventory
+            GameObject rightHandSlot = GameObject.Find("Right Hand");
+            rightHandSlot.transform.GetChild(1).gameObject.SetActive(false);
         }
     }
 
@@ -104,9 +123,19 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                 var rightHandWeaponItem = rightHandWeapon.GetComponent<Item>();
                 if (rightHandWeaponItem && rightHandWeaponItem.id == slotGameObject.GetComponent<Item>().id)
                 {
+                    // Right hand is equiped
                     rightHandWeapon.gameObject.SetActive(true);
                     Player.Instance.weapon = slotGameObject.GetComponent<Weapon>();
                     rightHandWeapon.GetComponent<Item>().equipped = true;
+
+                    // Activate the right hand slot on character inventory
+                    GameObject rightHandSlot = GameObject.Find("Right Hand");
+                    rightHandSlot.transform.GetChild(1).gameObject.SetActive(true);
+                    rightHandSlot.transform.GetChild(1).GetComponent<Image>().sprite = icon;
+
+                    // Clean slot
+                    gameObject.SetActive(false);
+
                 }
             }
         }
