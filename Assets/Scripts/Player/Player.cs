@@ -23,24 +23,65 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public int gold;
     public int level;
 
-    // Player Default Attributes
+    // Player Stats Attributes
     public int health;
+    public int healthBuff;
+    public int healthMalus;
+    public int healthFinal;
     public int currentHealth;
     public int healthRegeneration;
+    public int healthRegenerationBuff;
+    public int healthRegenerationMalus;
+    public int healthRegenerationFinal;
     public int mana;
+    public int manaBuff;
+    public int manaMalus;
+    public int manaFinal;
+    public int manaRegeneration;
+    public int manaRegenerationBuff;
+    public int manaRegenerationMalus;
+    public int mangaRegenerationFinal;
     public int currentMana;
-    public int strenght;
-    public int endurance;
-    public int dexterity;
-    public int wisdom;
-    public int intelect;
 
-    // Player Default Skills
+    // Player Attributes
+    public int strenght;
+    public int strenghtBuff;
+    public int strenghtMalus;
+    public int strenghtFinal;
+    public int endurance;
+    public int enduranceBuff;
+    public int enduranceMalus;
+    public int enduranceFinal;
+    public int dexterity;
+    public int dexterityBuff;
+    public int dexterityMalus;
+    public int dexterityFinal;
+    public int intelect;
+    public int intelectBuff;
+    public int intelectMalus;
+    public int intelectFinal;
+    public int wisdom;
+    public int wisdomBuff;
+    public int wisdomMalus;
+    public int wisdomFinal;
+
+    // Player Skills
     public int attack;
+    public int attackBuff;
+    public int attackMalus;
+    public int attackFinal;
     public int archery;
+    public int archeryBuff;
+    public int archeryMalus;
+    public int archeryFinal;
     public int dodge;
+    public int dodgeBuff;
+    public int dodgeMalus;
+    public int dodgeFinal;
     public int armorClass;
-    public int damage;
+    public int armorClassBuff;
+    public int armorClassMalus;
+    public int armorClassFinal;
 
     // Canvas Health Bars
     public RectTransform healthBar;
@@ -72,6 +113,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public GameObject diedParticles;
     public GameObject lootParticles;
     private GameObject goHitParticles;
+    private int damage;
     private float nextAttack = 0;
     private bool attackSuccess;
 
@@ -156,6 +198,12 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     void Update()
     {
+        // Refresh Attributes, buff & malus care
+        currentAttributes();
+
+        // Refresh Skills, buff & malus care
+        currentSkills();
+
         // Try attacking a valid target
         if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
 
@@ -176,6 +224,22 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     }
 
     // Custom Functions
+
+    public void currentAttributes()
+    {
+        strenghtFinal = strenght + strenghtBuff - strenghtMalus;
+        enduranceFinal = endurance + enduranceBuff - enduranceMalus;
+        dexterityFinal = dexterity + dexterityBuff - dexterityMalus;
+        intelectFinal = intelect + intelectBuff - intelectMalus;
+        wisdomFinal = wisdom + wisdomBuff - wisdomMalus;
+    }
+
+    public void currentSkills()
+    {
+        attackFinal = attack + attackBuff - attackMalus;
+        archeryFinal = archery + archeryBuff - archeryMalus;
+        dodgeFinal = dodge + dodgeBuff - dodgeMalus;
+    }
 
     public void resetTarget()
     {
@@ -364,9 +428,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 1);
             Camera.main.transform.rotation = cameraRotation;
 
-            if (weapon.isHand) attackSuccess = Random.Range(1, attack) >= Random.Range(1, targetMonster.dodge);
-            if (weapon.isMelee) attackSuccess = Random.Range(1, attack) >= Random.Range(1, targetMonster.dodge);
-            if (weapon.isRange) attackSuccess = Random.Range(1, archery) >= Random.Range(1, targetMonster.dodge);
+            if (weapon.isHand) attackSuccess = Random.Range(1, attackFinal) >= Random.Range(1, targetMonster.dodge);
+            if (weapon.isMelee) attackSuccess = Random.Range(1, attackFinal) >= Random.Range(1, targetMonster.dodge);
+            if (weapon.isRange) attackSuccess = Random.Range(1, archeryFinal) >= Random.Range(1, targetMonster.dodge);
 
             if (attackSuccess)
             {
