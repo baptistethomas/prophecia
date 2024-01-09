@@ -211,6 +211,7 @@ public class Monster : MonoBehaviour
         transform.position = initialPosition;
         isWaitingForRespawn = false;
         agent.isStopped = false;
+        agent.ResetPath();
         childHealthBar.localScale = healthBarLocalSpace;
     }
 

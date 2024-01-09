@@ -48,7 +48,7 @@ public class Inventory : MonoBehaviour
 
     private void InitSlots()
     {
-        allSlots = 128;
+        allSlots = 120;
         slot = new GameObject[allSlots];
 
         for (int i = 0; i < allSlots; i++)
@@ -109,6 +109,9 @@ public class Inventory : MonoBehaviour
                 // Slot isnt avalaible anymore
                 slot[i].GetComponent<Slot>().UpdateSlot();
                 slot[i].GetComponent<Slot>().empty = false;
+
+                // Make the slot active
+                slot[i].SetActive(true);
 
                 return;
             }
