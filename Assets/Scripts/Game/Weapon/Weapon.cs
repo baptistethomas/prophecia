@@ -15,4 +15,11 @@ public class Weapon : MonoBehaviour
     public int requiredDexterity;
     public int requiredWisdom;
     public int requiredIntelect;
+    public int bonusStrenght;
+    public int bonusEndurance;
+    public int bonusDexterity;
+    public int bonusWisdom;
+    public int bonusIntelect;
+    public int bonusAttack;
+    public int bonusArchery;
 }

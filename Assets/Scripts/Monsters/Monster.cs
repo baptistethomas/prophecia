@@ -138,7 +138,7 @@ public class Monster : MonoBehaviour
 
                 if (Random.Range(1, attack) >= Random.Range(1, Player.Instance.dodgeFinal))
                 {
-                    meleeDamage = Random.Range(damageMin, damageMax) - Player.Instance.armorClass;
+                    meleeDamage = Random.Range(damageMin, damageMax) - (int)(Player.Instance.armorClassFinal);
                     if (Player.Instance.currentHealth > 0)
                         Player.Instance.currentHealth -= meleeDamage;
                     StartCoroutine("AttackHitThePlayer");

@@ -35,25 +35,110 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         // Equip Item on double click inventory slot
         if ((lastClick + interval) > Time.time)
         {
-            // Last slot child
+            // slot Game Object
             slotGameObject = transform.GetChild(transform.childCount - 1).gameObject;
-            if (slotGameObject.GetComponent<Weapon>() && slotGameObject.GetComponent<Weapon>().isRange == true)
-            {
-                putAwayLeftHand();
-                putAwayRightHand();
-                equipLeftHandWeapon();
-            }
-            if (slotGameObject.GetComponent<Weapon>() && slotGameObject.GetComponent<Weapon>().isMelee == true)
-            {
-                putAwayLeftHand();
-                putAwayRightHand();
-                equipRightHandWeapon();
-            }
+
+            // Weapon
+            equipWeaponSlot();
+
+            // Armor part
+            equipArmorSlot();
+
+            // Reset Player Target
             Player.Instance.resetTarget();
         }
         else
         {
             lastClick = Time.time;
+        }
+    }
+
+    private void equipArmorSlot()
+    {
+        if (slotGameObject.GetComponent<Armor>())
+        {
+            putAwayArmorPart();
+            equipArmorPart();
+        }
+    }
+    private void equipWeaponSlot()
+    {
+        if (slotGameObject.GetComponent<Weapon>() && slotGameObject.GetComponent<Weapon>().isRange == true)
+        {
+            putAwayLeftHand();
+            putAwayRightHand();
+            equipLeftHandWeapon();
+        }
+        if (slotGameObject.GetComponent<Weapon>() && slotGameObject.GetComponent<Weapon>().isMelee == true)
+        {
+            putAwayLeftHand();
+            putAwayRightHand();
+            equipRightHandWeapon();
+        }
+    }
+
+    private void putAwayArmorPart()
+    {
+        GameObject armorSet = GameObject.Find(slotGameObject.GetComponent<Armor>().category);
+        if (armorSet != null)
+        {
+            for (int i = 0; i < armorSet.transform.childCount; i++)
+            {
+                // Remove Part Armor Active Object
+                if (armorSet.transform.GetChild(i) && armorSet.transform.GetChild(i).GetComponent<Armor>().bodyPart == slotGameObject.GetComponent<Armor>().bodyPart)
+                {
+                    armorSet.transform.GetChild(i).gameObject.SetActive(false);
+                }
+
+                // Disable body part slot on character equipment
+                GameObject armorSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
+                armorSlot.transform.GetChild(1).gameObject.SetActive(false);
+
+                // Back in inventory
+                if (armorSlot.transform.childCount == 3) resetEquipedSlot(armorSlot);
+            }
+        }
+    }
+
+    private void equipArmorPart()
+    {
+        GameObject armorSet = GameObject.Find(slotGameObject.GetComponent<Armor>().category);
+        if (armorSet != null)
+        {
+            for (int i = 0; i < armorSet.transform.childCount; i++)
+            {
+                var armorPart = armorSet.transform.GetChild(i);
+                if (armorPart.GetComponent<Item>().id == slotGameObject.GetComponent<Item>().id)
+                {
+                    // Armor Part is equiped
+                    armorPart.gameObject.SetActive(true);
+                    armorPart.GetComponent<Item>().equipped = true;
+
+                    // Activate the armor part slot on character equipment
+                    GameObject armorPartSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
+                    armorPartSlot.transform.GetChild(1).gameObject.SetActive(true);
+                    armorPartSlot.transform.GetChild(1).GetComponent<Image>().sprite = icon;
+                    GameObject armor = new GameObject(slotGameObject.name);
+
+                    // Disabled skin mesh from player matching with armor parts
+                    if (GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart)) GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart).SetActive(false);
+                    if (slotGameObject.GetComponent<Armor>().bodyPart == "Chest") GameObject.Find("Arms").SetActive(false); // Chest need arms being disabled too
+                    if (slotGameObject.GetComponent<Armor>().bodyPart == "Legs") GameObject.Find("Underwear").SetActive(false); // Legs need underwear being disabled too
+
+                    // Copy armor part to equiped slot
+                    armor = slotGameObject;
+                    armor.transform.SetParent(armorPartSlot.transform);
+
+                    // Adding Equipment Bonus & Malus
+                    Player.Instance.armorClassBuff += slotGameObject.GetComponent<Armor>().armorClass;
+                    Player.Instance.dodgeBuff += slotGameObject.GetComponent<Armor>().bonusDodge;
+                    Player.Instance.dodgeMalus += slotGameObject.GetComponent<Armor>().malusDodge;
+                    Player.Instance.encombrement += slotGameObject.GetComponent<Armor>().encombrement;
+
+                    // Clean Inventory Slot
+                    resetInventorySlot();
+                }
+            }
         }
     }
 

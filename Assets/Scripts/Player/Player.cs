@@ -42,6 +42,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public int manaRegenerationMalus;
     public int mangaRegenerationFinal;
     public int currentMana;
+    public int encombrement;
 
     // Player Attributes
     public int strenght;
@@ -78,10 +79,10 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public int dodgeBuff;
     public int dodgeMalus;
     public int dodgeFinal;
-    public int armorClass;
-    public int armorClassBuff;
-    public int armorClassMalus;
-    public int armorClassFinal;
+    public float armorClass;
+    public float armorClassBuff;
+    public float armorClassMalus;
+    public float armorClassFinal;
 
     // Canvas Health Bars
     public RectTransform healthBar;
@@ -201,6 +202,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Refresh Attributes, buff & malus care
         currentAttributes();
 
+        // Refresh Current Armor Class
+        currentArmorClass();
+
         // Refresh Skills, buff & malus care
         currentSkills();
 
@@ -224,6 +228,11 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     }
 
     // Custom Functions
+
+    public void currentArmorClass()
+    {
+        armorClassFinal = armorClass + armorClassBuff - armorClassMalus;
+    }
 
     public void currentAttributes()
     {
@@ -329,7 +338,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public void FirstMoveToItem(RaycastHit hit)
     {
         resetTarget();
-
         // Thes conditions matches with ContinueMoveItem in Update()
         hit.collider.TryGetComponent(out Item target);
         targetItem = target;
@@ -341,7 +349,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         moveToTarget = true;
         animator.SetBool("run", true);
         agent.speed = _speed;
-        agent.destination = targetItem.transform.position;
+        agent.destination = targetItem.gameObject.transform.position;
     }
 
     public void ContinueAttack()
