@@ -61,6 +61,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             equipArmorPart();
         }
     }
+
     private void equipWeaponSlot()
     {
         if (slotGameObject.GetComponent<Weapon>() && slotGameObject.GetComponent<Weapon>().isRange == true)
@@ -74,29 +75,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             putAwayLeftHand();
             putAwayRightHand();
             equipRightHandWeapon();
-        }
-    }
-
-    private void putAwayArmorPart()
-    {
-        GameObject armorSet = GameObject.Find(slotGameObject.GetComponent<Armor>().category);
-        if (armorSet != null)
-        {
-            for (int i = 0; i < armorSet.transform.childCount; i++)
-            {
-                // Remove Part Armor Active Object
-                if (armorSet.transform.GetChild(i) && armorSet.transform.GetChild(i).GetComponent<Armor>().bodyPart == slotGameObject.GetComponent<Armor>().bodyPart)
-                {
-                    armorSet.transform.GetChild(i).gameObject.SetActive(false);
-                }
-
-                // Disable body part slot on character equipment
-                GameObject armorSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
-                armorSlot.transform.GetChild(1).gameObject.SetActive(false);
-
-                // Back in inventory
-                if (armorSlot.transform.childCount == 3) resetEquipedSlot(armorSlot);
-            }
         }
     }
 
@@ -138,6 +116,29 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                     // Clean Inventory Slot
                     resetInventorySlot();
                 }
+            }
+        }
+    }
+
+    private void putAwayArmorPart()
+    {
+        GameObject armorSet = GameObject.Find(slotGameObject.GetComponent<Armor>().category);
+        if (armorSet != null)
+        {
+            for (int i = 0; i < armorSet.transform.childCount; i++)
+            {
+                // Remove Part Armor Active Object
+                if (armorSet.transform.GetChild(i) && armorSet.transform.GetChild(i).GetComponent<Armor>().bodyPart == slotGameObject.GetComponent<Armor>().bodyPart)
+                {
+                    armorSet.transform.GetChild(i).gameObject.SetActive(false);
+                }
+
+                // Disable body part slot on character equipment
+                GameObject armorSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
+                if (armorSlot.transform.GetChild(1)) armorSlot.transform.GetChild(1).gameObject.SetActive(false);
+
+                // Back in inventory
+                if (armorSlot.transform.childCount == 3) resetEquipedSlot(armorSlot);
             }
         }
     }

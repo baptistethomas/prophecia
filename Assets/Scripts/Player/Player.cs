@@ -109,7 +109,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     // Target Attack
     public Monster targetMonster;
-    public Item targetItem;
+    public GameObject targetSackGameObject;
     public GameObject hitParticles;
     public GameObject diedParticles;
     public GameObject lootParticles;
@@ -212,7 +212,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
 
         // Try picking a valid item(targetItem)
-        if (targetItem) ContinueToMoveToItem();
+        if (targetSackGameObject) ContinueToMoveToItem();
 
         // Update Health Player
         UpdateCanvasHealthPlayer();
@@ -255,7 +255,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         agent.ResetPath();
         agent.isStopped = false;
         targetMonster = null;
-        targetItem = null;
+        targetSackGameObject = null;
         isAttacking = false;
         animator.SetBool("meleeAttack", false);
         animator.SetBool("rangeAttack", false);
@@ -326,7 +326,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
                 if (Physics.Raycast(ray, out hit) && canAttack == true && hit.collider.gameObject.CompareTag("Monster")) FirstAttack(hit);
 
                 // This is a unequipped item pick up click
-                if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.CompareTag("Item") && hit.collider.gameObject.GetComponent<Item>().equipped == false) FirstMoveToItem(hit);
+                if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.CompareTag("Sack")) FirstMoveToSack(hit);
 
             }
 
@@ -335,13 +335,12 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         }
     }
 
-    public void FirstMoveToItem(RaycastHit hit)
+    public void FirstMoveToSack(RaycastHit hit)
     {
         resetTarget();
         // Thes conditions matches with ContinueMoveItem in Update()
-        hit.collider.TryGetComponent(out Item target);
-        targetItem = target;
-        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetItem.transform.position - transform.position), 1);
+        targetSackGameObject = hit.collider.gameObject;
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetSackGameObject.transform.position - transform.position), 1);
     }
 
     public void ContinueToMoveToItem()
@@ -349,7 +348,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         moveToTarget = true;
         animator.SetBool("run", true);
         agent.speed = _speed;
-        agent.destination = targetItem.gameObject.transform.position;
+        agent.destination = targetSackGameObject.transform.position;
     }
 
     public void ContinueAttack()
