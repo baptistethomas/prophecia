@@ -129,6 +129,10 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     // XP
     public int experiencePerHit;
 
+    // SFX
+    public AudioClip[] sfx;
+    private AudioSource audioSource;
+
     // Unity Functions
 
     void Awake()
@@ -143,16 +147,17 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         _instance = this;
         DontDestroyOnLoad(this.gameObject);
 
+    }
+
+    void Start()
+    {
         // Get Components
         agent = GetComponent<NavMeshAgent>();
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         hands = GameObject.Find("Punch");
+        audioSource = GetComponent<AudioSource>();
 
-    }
-
-    void Start()
-    {
         // Init Cursos & Health Bar
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
         healthBarLocalSpace = healthBar.localScale;
@@ -439,17 +444,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             if (weapon.isMelee) attackSuccess = Random.Range(1, attackFinal) >= Random.Range(1, targetMonster.dodge);
             if (weapon.isRange) attackSuccess = Random.Range(1, archeryFinal) >= Random.Range(1, targetMonster.dodge);
 
-            if (attackSuccess)
-            {
-                StartCoroutine("IAttackSuccess");
-                StartCoroutine("IHitSuccessShowDamage");
-                OnHitGiveExperience();
-            }
-            else
-            {
-                StartCoroutine("IAttackFail");
-                StartCoroutine("IHitFailShowDodge");
-            }
+            StartCoroutine("IAttack");
+
 
         }
     }
@@ -532,7 +528,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     // Coroutines
 
-    IEnumerator IAttackSuccess()
+    IEnumerator IAttack()
     {
         canAttack = false;
         canMove = false;
@@ -540,48 +536,53 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (weapon.isMelee) animator.SetBool("meleeAttack", true);
         if (weapon.isRange) animator.SetBool("rangeAttack", true);
         damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix;
-        yield return new WaitForSeconds(weapon.frequency / 2); // Collision is usually on middle of anim, frequency shot by 2 should be match
-        // Is target monster still available after delay ?
-        if (targetMonster != null)
+        yield return new WaitForSeconds(weapon.frequency);
+    }
+
+    public void hitAttack()
+    {
+        if (attackSuccess)
         {
-            // Arrow Success Attack Move
-            if (weapon.isRange)
+            // Attack is success
+            if (targetMonster != null)
             {
-                GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
-                projectile.OnBowShootingArrowSuccess(targetMonster);
+                // Arrow Success Attack Move
+                if (weapon.isRange)
+                {
+                    GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
+                    projectile.OnBowShootingArrowSuccess(targetMonster);
+                }
+
+                OnHitSuccessShowDamage();
+                OnHitGiveExperience();
+
+                // Damage apply
+                targetMonster.currentHealth -= damage;
+                if (targetMonster && targetMonster.isDead == false) goHitParticles = Instantiate(hitParticles, new Vector3(targetMonster.transform.position.x, targetMonster.transform.position.y + 1, targetMonster.transform.position.z), Quaternion.identity);
+                if (targetMonster && targetMonster.isDead == false) Destroy(goHitParticles, 2);
             }
-            targetMonster.currentHealth -= damage;
-            if (targetMonster && targetMonster.isDead == false) goHitParticles = Instantiate(hitParticles, new Vector3(targetMonster.transform.position.x, targetMonster.transform.position.y + 1, targetMonster.transform.position.z), Quaternion.identity);
-            if (targetMonster && targetMonster.isDead == false) Destroy(goHitParticles, 2);
         }
+        else
+        {
+            // Attack is fail
+            if (targetMonster != null)
+            {
+                // Arrow Fail Attack Move
+                if (weapon.isRange)
+                {
+                    GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
+                    projectile.OnBowShootingArrowFail(targetMonster);
+                }
+                OnHitFailShowDodge();
+            }
+        }
+
         canAttack = true;
         canMove = true;
     }
 
-    IEnumerator IAttackFail()
+    private void OnHitSuccessShowDamage()
     {
-        canAttack = false;
-        canMove = false;
-        if (weapon.isMelee) animator.SetBool("meleeAttack", true);
-        if (weapon.isRange) animator.SetBool("rangeAttack", true);
-        yield return new WaitForSeconds(weapon.frequency / 2); // to do, weapon delay in ms to pass a parameter and use instead of 1
-        // Is target monster still available after delay ?
-        if (targetMonster != null)
-        {
-            // Arrow Fail Attack Move
-            if (weapon.isRange)
-            {
-                GameObject.Find("Arrow").TryGetComponent(out Projectile projectile);
-                projectile.OnBowShootingArrowFail(targetMonster);
-            }
-        }
-        canAttack = true;
-        canMove = true;
-    }
-
-    IEnumerator IHitSuccessShowDamage()
-    {
-        yield return new WaitForSeconds(weapon.frequency / 2);
         // Is target monster still available after delay ?
         if (targetMonster != null)
         {
@@ -596,9 +597,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         }
     }
 
-    IEnumerator IHitFailShowDodge()
+    private void OnHitFailShowDodge()
     {
-        yield return new WaitForSeconds(weapon.frequency / 2);
         // Is target monster still available after delay ?
         if (targetMonster != null)
         {
@@ -611,5 +611,27 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
             DynamicTextManager.CreateText(destination, "Dodged!", data);
         }
+    }
+
+    // Audio
+
+    public void runAudio()
+    {
+        audioSource.PlayOneShot(sfx[0], 0.25f);
+    }
+
+    public void attackMeleeAudio()
+    {
+        audioSource.PlayOneShot(sfx[1], 0.05f);
+    }
+
+    public void attackRangeAudio()
+    {
+        audioSource.PlayOneShot(sfx[2], 0.05f);
+    }
+
+    public void attackRangeArrowAudio()
+    {
+        audioSource.PlayOneShot(sfx[3], 0.05f);
     }
 }
