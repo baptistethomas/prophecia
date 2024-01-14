@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -32,8 +33,10 @@ public class Monster : MonoBehaviour
 
     // Monster Loot
     public int gold;
+    public GameObject lootSack;
     public GameObject[] loot;
     public int[] lootRate;
+    public List<GameObject> lootList;
 
     // Monster Infos
     private GameObject meleeWeapon;
@@ -57,6 +60,10 @@ public class Monster : MonoBehaviour
     public float stopDistance;
     public float meleeRange;
 
+    // SFX
+    public AudioClip[] sfx;
+    private AudioSource audioSource;
+
     private void Awake()
     {
         initialPosition = transform.position;
@@ -73,6 +80,7 @@ public class Monster : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
         currentHealth = health;
     }
 
@@ -157,10 +165,17 @@ public class Monster : MonoBehaviour
         Player.Instance.canAttack = true;
 
         // Loot
-        for (int i = 0; i < lootRate.Length; i++)
+        for (int i = 0; i < loot.Length; i++)
         {
             if (Random.Range(1, 100) <= lootRate[i])
-                Instantiate(loot[i], transform.position, Quaternion.identity);
+            {
+                lootList.Add(loot[i]);
+            }
+        };
+        if (lootList.Count > 0)
+        {
+            GameObject droppedSack = Instantiate(lootSack, transform.position, Quaternion.identity);
+            droppedSack.GetComponent<Sack>().items = lootList;
         }
 
         // Die animation and particle
@@ -256,9 +271,15 @@ public class Monster : MonoBehaviour
         Destroy(goHitParticles, 2);
     }
 
+    public void GetHitAudio()
+    {
+        audioSource.PlayOneShot(sfx[1], 0.05f);
+        audioSource.PlayOneShot(sfx[0], 0.05f);
+    }
+
     IEnumerator AttackPlayer()
     {
-        yield return new WaitForSeconds(1); // On patiente 1 sec
-        canAttack = true; // On donne de nouveau la possibilit� au monstre d'attaquer
+        yield return new WaitForSeconds(1);
+        canAttack = true;
     }
 }

@@ -133,6 +133,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public AudioClip[] sfx;
     private AudioSource audioSource;
 
+    // Inventory
+    public bool inventoryEnabled;
+
     // Unity Functions
 
     void Awake()
@@ -480,7 +483,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void OnMoveMouse()
     {
-        if (canMove)
+        if (canMove && inventoryEnabled == false)
         {
             // Reset Attack & Target
             resetTarget();
@@ -558,6 +561,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
                 // Damage apply
                 targetMonster.currentHealth -= damage;
+                targetMonster.GetComponent<Monster>().GetHitAudio();
                 if (targetMonster && targetMonster.isDead == false) goHitParticles = Instantiate(hitParticles, new Vector3(targetMonster.transform.position.x, targetMonster.transform.position.y + 1, targetMonster.transform.position.z), Quaternion.identity);
                 if (targetMonster && targetMonster.isDead == false) Destroy(goHitParticles, 2);
             }

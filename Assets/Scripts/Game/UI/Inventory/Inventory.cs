@@ -4,7 +4,6 @@ public class Inventory : MonoBehaviour
 {
     public GameObject inventory;
     public GameObject characterStats;
-    private bool inventoryEnabled;
 
     private int allSlots;
     private int enabledSlots;
@@ -21,11 +20,13 @@ public class Inventory : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.I))
         {
-            inventoryEnabled = !inventoryEnabled;
+            Player.Instance.inventoryEnabled = !Player.Instance.inventoryEnabled;
         }
 
-        if (inventoryEnabled == true)
+        if (Player.Instance.inventoryEnabled == true)
         {
+
+            // Slots logic
             for (int i = 0; i < allSlots; i++)
             {
                 if (slot[i].transform.Find("Count"))
@@ -38,6 +39,9 @@ public class Inventory : MonoBehaviour
             inventory.SetActive(true);
             characterStats.SetActive(true);
             ShowAttributes();
+
+            // Get Current Gold Amount
+            CurrentGoldAmount();
         }
         else
         {
@@ -83,38 +87,64 @@ public class Inventory : MonoBehaviour
         GameObject wisdom = GameObject.Find("Wisdom");
         wisdom.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
             Player.Instance.wisdomFinal.ToString();
+
+        GameObject armor = GameObject.Find("Armor");
+        armor.transform.Find("Points").GetComponent<TMPro.TextMeshProUGUI>().text =
+            Player.Instance.armorClassFinal.ToString();
     }
 
     public void AddItem(GameObject itemObject, int itemId, string itemType, string itemDescription, Sprite itemIcon)
     {
+        // Look for Stacking First
         for (int i = 0; i < allSlots; i++)
         {
 
-            if (slot[i].GetComponent<Slot>().empty || slot[i].GetComponent<Slot>().id == itemId)
+            if (slot[i].GetComponent<Slot>().id == itemId)
             {
-                // Add Item
-                itemObject.GetComponent<Item>().pickedUp = true;
-
-                // Mapping Item Data
-                slot[i].GetComponent<Slot>().item = itemObject;
-                slot[i].GetComponent<Slot>().icon = itemIcon;
-                slot[i].GetComponent<Slot>().type = itemType;
-                slot[i].GetComponent<Slot>().id = itemId;
-                slot[i].GetComponent<Slot>().description = itemDescription;
-
-                // Item got sloted on inventory, he is not active anymore
-                itemObject.transform.parent = slot[i].transform;
-                itemObject.SetActive(false);
-
-                // Slot isnt avalaible anymore
-                slot[i].GetComponent<Slot>().UpdateSlot();
-                slot[i].GetComponent<Slot>().empty = false;
-
-                // Make the slot active
-                slot[i].SetActive(true);
-
+                AddItemSlotMapping(itemObject, itemId, itemType, itemDescription, itemIcon, i);
                 return;
             }
         }
+
+        // Look for Empty if nothing to stack
+        for (int i = 0; i < allSlots; i++)
+        {
+
+            if (slot[i].GetComponent<Slot>().empty)
+            {
+                AddItemSlotMapping(itemObject, itemId, itemType, itemDescription, itemIcon, i);
+                return;
+            }
+        }
+    }
+
+    public void AddItemSlotMapping(GameObject itemObject, int itemId, string itemType, string itemDescription, Sprite itemIcon, int i)
+    {
+        // Add Item
+        itemObject.GetComponent<Item>().pickedUp = true;
+
+        // Mapping Item Data
+        slot[i].GetComponent<Slot>().item = itemObject;
+        slot[i].GetComponent<Slot>().icon = itemIcon;
+        slot[i].GetComponent<Slot>().type = itemType;
+        slot[i].GetComponent<Slot>().id = itemId;
+        slot[i].GetComponent<Slot>().description = itemDescription;
+
+        // Item got sloted on inventory, he is not active anymore
+        itemObject.transform.parent = slot[i].transform;
+        itemObject.SetActive(false);
+
+        // Slot isnt avalaible anymore
+        slot[i].GetComponent<Slot>().UpdateSlot();
+        slot[i].GetComponent<Slot>().empty = false;
+
+        // Make the slot active
+        slot[i].SetActive(true);
+    }
+
+    public void CurrentGoldAmount()
+    {
+        GameObject goldInventory = GameObject.Find("Gold");
+        goldInventory.transform.Find("Gold Amount").GetComponent<TMPro.TextMeshProUGUI>().text = Player.Instance.gold.ToString();
     }
 }
