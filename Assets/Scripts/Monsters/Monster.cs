@@ -185,6 +185,7 @@ public class Monster : MonoBehaviour
         // Flag as dead, prepair respawn & reset Player's target & nav mash relative to dead monster
         isDead = true;
         GetComponent<Collider>().enabled = false;
+        GetComponent<NavMeshAgent>().enabled = false;
 
         StartCoroutine(RespawnDeadMonster());
 
@@ -222,6 +223,7 @@ public class Monster : MonoBehaviour
         currentHealth = health;
         animator.SetTrigger("idle");
         GetComponent<Collider>().enabled = true;
+        GetComponent<NavMeshAgent>().enabled = true;
         isDead = false;
         transform.position = initialPosition;
         isWaitingForRespawn = false;
