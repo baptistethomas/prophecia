@@ -122,6 +122,7 @@ public class Inventory : MonoBehaviour
     {
         // Add Item
         itemObject.GetComponent<Item>().pickedUp = true;
+        itemObject.GetComponent<Item>().equipped = false;
 
         // Mapping Item Data
         slot[i].GetComponent<Slot>().item = itemObject;

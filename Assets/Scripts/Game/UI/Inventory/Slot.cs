@@ -90,22 +90,22 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                 {
                     // Armor Part is equiped
                     armorPart.gameObject.SetActive(true);
-                    armorPart.GetComponent<Item>().equipped = true;
 
                     // Activate the armor part slot on character equipment
                     GameObject armorPartSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
                     armorPartSlot.transform.GetChild(1).gameObject.SetActive(true);
                     armorPartSlot.transform.GetChild(1).GetComponent<Image>().sprite = icon;
-                    GameObject armor = new GameObject(slotGameObject.name);
+                    //GameObject armor = new GameObject(slotGameObject.name);
 
                     // Disabled skin mesh from player matching with armor parts
-                    if (GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart)) GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart).SetActive(false);
-                    if (slotGameObject.GetComponent<Armor>().bodyPart == "Chest") GameObject.Find("Arms").SetActive(false); // Chest need arms being disabled too
-                    if (slotGameObject.GetComponent<Armor>().bodyPart == "Legs") GameObject.Find("Underwear").SetActive(false); // Legs need underwear being disabled too
+                    if (GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart)) GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart).GetComponent<Renderer>().enabled = false;
+                    if (slotGameObject.GetComponent<Armor>().bodyPart == "Chest") GameObject.Find("Arms").GetComponent<Renderer>().enabled = false; // Chest need arms being disabled too
+                    if (slotGameObject.GetComponent<Armor>().bodyPart == "Legs") GameObject.Find("Underwear").GetComponent<Renderer>().enabled = false; // Legs need underwear being disabled too
 
                     // Copy armor part to equiped slot
-                    armor = slotGameObject;
+                    GameObject armor = slotGameObject;
                     armor.transform.SetParent(armorPartSlot.transform);
+                    armor.GetComponent<Item>().equipped = true;
 
                     // Adding Equipment Bonus & Malus
                     Player.Instance.armorClassBuff += slotGameObject.GetComponent<Armor>().armorClass;
@@ -130,15 +130,16 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                 // Remove Part Armor Active Object
                 if (armorSet.transform.GetChild(i) && armorSet.transform.GetChild(i).GetComponent<Armor>().bodyPart == slotGameObject.GetComponent<Armor>().bodyPart)
                 {
+                    // Disable Armor
                     armorSet.transform.GetChild(i).gameObject.SetActive(false);
+
+                    // Disable Slot Equipment
+                    GameObject armorSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
+                    if (armorSlot.transform.GetChild(1)) armorSlot.transform.GetChild(1).gameObject.SetActive(false);
+
+                    // Back in inventory
+                    if (armorSlot.transform.childCount == 3) resetEquipedSlot(armorSlot);
                 }
-
-                // Disable body part slot on character equipment
-                GameObject armorSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
-                if (armorSlot.transform.GetChild(1)) armorSlot.transform.GetChild(1).gameObject.SetActive(false);
-
-                // Back in inventory
-                if (armorSlot.transform.childCount == 3) resetEquipedSlot(armorSlot);
             }
         }
     }
@@ -203,10 +204,9 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                     GameObject leftHandSlot = GameObject.Find("Left Hand");
                     leftHandSlot.transform.GetChild(1).gameObject.SetActive(true);
                     leftHandSlot.transform.GetChild(1).GetComponent<Image>().sprite = icon;
-                    GameObject leftWeapon = new GameObject(slotGameObject.name);
 
                     // Copy left weapon object to equiped slot
-                    leftWeapon = slotGameObject;
+                    GameObject leftWeapon = slotGameObject;
                     leftWeapon.transform.SetParent(leftHandSlot.transform);
 
                     // Clean Inventory Slot
@@ -240,10 +240,9 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                     GameObject rightHandSlot = GameObject.Find("Right Hand");
                     rightHandSlot.transform.GetChild(1).gameObject.SetActive(true);
                     rightHandSlot.transform.GetChild(1).GetComponent<Image>().sprite = icon;
-                    GameObject rightWeapon = new GameObject(slotGameObject.name);
 
                     // Copy left weapon object to equiped slot
-                    rightWeapon = slotGameObject;
+                    GameObject rightWeapon = slotGameObject;
                     rightWeapon.transform.SetParent(rightHandSlot.transform);
 
                     // Clean Inventory Slot
