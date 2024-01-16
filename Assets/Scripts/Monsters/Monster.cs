@@ -193,7 +193,7 @@ public class Monster : MonoBehaviour
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CustomCursor.Instance.cursorMode);
 
         // Reset Target
-        Player.Instance.resetTarget();
+        Player.Instance.ResetTarget();
 
     }
 

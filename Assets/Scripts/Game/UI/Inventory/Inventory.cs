@@ -1,15 +1,35 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
     public GameObject inventory;
     public GameObject characterStats;
-
-    private int allSlots;
-    private int enabledSlots;
-    private GameObject[] slot;
-
     public GameObject slotHolder;
+    private GameObject[] slotContent;
+    private int allSlots;
+
+    // Player Instance
+    private static Inventory _instance;
+    public static Inventory instance;
+    public static Inventory Instance
+    {
+        get { return _instance; }
+    }
+
+    void Awake()
+    {
+        // Instance Singleton, Player is used in Monster Class
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        _instance = this;
+        DontDestroyOnLoad(this.gameObject);
+
+    }
 
     void Start()
     {
@@ -25,22 +45,11 @@ public class Inventory : MonoBehaviour
 
         if (Player.Instance.inventoryEnabled == true)
         {
-
-            // Slots logic
-            for (int i = 0; i < allSlots; i++)
-            {
-                if (slot[i].transform.Find("Count"))
-                {
-                    int countItem = slot[i].transform.childCount - 2;
-                    if (countItem > 0) slot[i].transform.Find("Count").GetComponent<TMPro.TextMeshProUGUI>().text = countItem.ToString();
-                }
-            }
-
+            Player.Instance.ResetTarget();
             inventory.SetActive(true);
             characterStats.SetActive(true);
             ShowAttributes();
-
-            // Get Current Gold Amount
+            CurrentCountOfItems();
             CurrentGoldAmount();
         }
         else
@@ -53,15 +62,14 @@ public class Inventory : MonoBehaviour
     private void InitSlots()
     {
         allSlots = 120;
-        slot = new GameObject[allSlots];
+        slotContent = new GameObject[allSlots];
 
         for (int i = 0; i < allSlots; i++)
         {
-            slot[i] = slotHolder.transform.GetChild(i).gameObject;
-
-            if (slot[i].GetComponent<Slot>().item == null)
+            slotContent[i] = slotHolder.transform.GetChild(i).Find("Slot Content").gameObject;
+            if (slotContent[i].GetComponent<Slot>().item == null)
             {
-                slot[i].GetComponent<Slot>().empty = true;
+                slotContent[i].GetComponent<Slot>().empty = true;
             }
         }
     }
@@ -98,8 +106,7 @@ public class Inventory : MonoBehaviour
         // Look for Stacking First
         for (int i = 0; i < allSlots; i++)
         {
-
-            if (slot[i].GetComponent<Slot>().id == itemId)
+            if (slotContent[i].GetComponent<Slot>().id == itemId)
             {
                 AddItemSlotMapping(itemObject, itemId, itemType, itemDescription, itemIcon, i);
                 return;
@@ -110,7 +117,7 @@ public class Inventory : MonoBehaviour
         for (int i = 0; i < allSlots; i++)
         {
 
-            if (slot[i].GetComponent<Slot>().empty)
+            if (slotContent[i].GetComponent<Slot>().empty)
             {
                 AddItemSlotMapping(itemObject, itemId, itemType, itemDescription, itemIcon, i);
                 return;
@@ -125,27 +132,82 @@ public class Inventory : MonoBehaviour
         itemObject.GetComponent<Item>().equipped = false;
 
         // Mapping Item Data
-        slot[i].GetComponent<Slot>().item = itemObject;
-        slot[i].GetComponent<Slot>().icon = itemIcon;
-        slot[i].GetComponent<Slot>().type = itemType;
-        slot[i].GetComponent<Slot>().id = itemId;
-        slot[i].GetComponent<Slot>().description = itemDescription;
+        slotContent[i].GetComponent<Slot>().item = itemObject;
+        slotContent[i].GetComponent<Slot>().icon = itemIcon;
+        slotContent[i].GetComponent<Slot>().type = itemType;
+        slotContent[i].GetComponent<Slot>().id = itemId;
+        slotContent[i].GetComponent<Slot>().description = itemDescription;
+
+        // Changing Slot Image
+        if (slotContent[i].transform.Find("Panel"))
+        {
+            slotContent[i].transform.Find("Panel").GetComponent<Image>().sprite = itemIcon;
+            slotContent[i].transform.Find("Panel").GetComponent<Image>().enabled = true;
+        }
 
         // Item got sloted on inventory, he is not active anymore
-        itemObject.transform.parent = slot[i].transform;
+        itemObject.transform.parent = slotContent[i].transform;
         itemObject.SetActive(false);
 
         // Slot isnt avalaible anymore
-        slot[i].GetComponent<Slot>().UpdateSlot();
-        slot[i].GetComponent<Slot>().empty = false;
+        slotContent[i].GetComponent<Slot>().empty = false;
 
         // Make the slot active
-        slot[i].SetActive(true);
+        slotContent[i].SetActive(true);
+    }
+
+    public void ConsumeItem(int itemId, string itemType)
+    {
+        for (int i = 0; i < allSlots; i++)
+        {
+            if (slotContent[i].GetComponent<Slot>().id == itemId && itemType == "Consumable")
+            {
+                if (slotContent[i].transform.childCount > 2)
+                {
+                    Transform transformItemToConsume = slotContent[i].transform.GetChild(2);
+                    if (transformItemToConsume != null)
+                    {
+                        transformItemToConsume.gameObject.GetComponent<Item>().ItemUsage();
+                        Destroy(transformItemToConsume.gameObject);
+                        return;
+                    }
+
+                }
+            }
+        }
     }
 
     public void CurrentGoldAmount()
     {
         GameObject goldInventory = GameObject.Find("Gold");
         goldInventory.transform.Find("Gold Amount").GetComponent<TMPro.TextMeshProUGUI>().text = Player.Instance.gold.ToString();
+    }
+
+    public void CurrentCountOfItems()
+    {
+        for (int i = 0; i < allSlots; i++)
+        {
+            if (slotHolder.transform.GetChild(i) != null && slotHolder.transform.GetChild(i).Find("Slot Content") != null)
+            {
+                slotContent[i] = slotHolder.transform.GetChild(i).Find("Slot Content").gameObject;
+                // Changing Slot Count
+                if (slotContent[i].transform.Find("Count"))
+                {
+                    int countItem = slotContent[i].transform.childCount - 2;
+                    if (countItem > 0)
+                    {
+                        slotContent[i].transform.Find("Count").GetComponent<TMPro.TextMeshProUGUI>().text = countItem.ToString();
+                        slotContent[i].transform.Find("Count").GetComponent<TMPro.TextMeshProUGUI>().enabled = true;
+                        slotContent[i].transform.Find("Panel").GetComponent<Image>().enabled = true;
+                    }
+                    else
+                    {
+                        slotContent[i].transform.Find("Count").GetComponent<TMPro.TextMeshProUGUI>().enabled = false;
+                        slotContent[i].transform.Find("Panel").GetComponent<Image>().enabled = false;
+                    }
+
+                }
+            }
+        }
     }
 }

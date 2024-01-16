@@ -208,13 +208,13 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     void Update()
     {
         // Refresh Attributes, buff & malus care
-        currentAttributes();
+        CurrentAttributes();
 
         // Refresh Current Armor Class
-        currentArmorClass();
+        CurrentArmorClass();
 
         // Refresh Skills, buff & malus care
-        currentSkills();
+        CurrentSkills();
 
         // Try attacking a valid target
         if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
@@ -226,23 +226,23 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         UpdateCanvasHealthPlayer();
 
         // Manager Left Click being Attack or Move
-        leftClickManager();
+        LeftClickManager();
 
         // Keyboard Moves
-        keyboardMoveManager();
+        KeyboardMoveManager();
 
         // Force Camera Keep Initial Config
-        forceCameraToBe3DIso();
+        ForceCameraToBe3DIso();
     }
 
     // Custom Functions
 
-    public void currentArmorClass()
+    public void CurrentArmorClass()
     {
         armorClassFinal = armorClass + armorClassBuff - armorClassMalus;
     }
 
-    public void currentAttributes()
+    public void CurrentAttributes()
     {
         strenghtFinal = strenght + strenghtBuff - strenghtMalus;
         enduranceFinal = endurance + enduranceBuff - enduranceMalus;
@@ -251,14 +251,14 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         wisdomFinal = wisdom + wisdomBuff - wisdomMalus;
     }
 
-    public void currentSkills()
+    public void CurrentSkills()
     {
         attackFinal = attack + attackBuff - attackMalus;
         archeryFinal = archery + archeryBuff - archeryMalus;
         dodgeFinal = dodge + dodgeBuff - dodgeMalus;
     }
 
-    public void resetTarget()
+    public void ResetTarget()
     {
         agent.ResetPath();
         agent.isStopped = false;
@@ -272,7 +272,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
     }
 
-    private void keyboardMoveManager()
+    private void KeyboardMoveManager()
     {
         if (directionKeyboard == Vector3.zero && directionMouse == Vector3.zero && moveToTarget == false) animator.SetBool("run", false);
         if (directionKeyboard != Vector3.zero)
@@ -293,7 +293,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         }
     }
 
-    private void forceCameraToBe3DIso()
+    private void ForceCameraToBe3DIso()
     {
         transform.position = new Vector3(transform.position.x, 50, transform.position.z);
         var limitPlayerRotation = transform.localEulerAngles;
@@ -303,7 +303,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         Camera.main.transform.rotation = Quaternion.Euler(30, 45, 0);
     }
 
-    public void leftClickManager()
+    public void LeftClickManager()
     {
         // Time and Set Left Click True
         if (Input.GetMouseButtonDown(0))
@@ -345,7 +345,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void FirstMoveToSack(RaycastHit hit)
     {
-        resetTarget();
+        ResetTarget();
         // Thes conditions matches with ContinueMoveItem in Update()
         targetSackGameObject = hit.collider.gameObject;
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetSackGameObject.transform.position - transform.position), 1);
@@ -414,7 +414,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void FirstAttack(RaycastHit hit)
     {
-        resetTarget();
+        ResetTarget();
 
         // These conditions matches with ContinueAttack() in Update()
         hit.collider.TryGetComponent(out Monster target);
@@ -486,7 +486,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (canMove && inventoryEnabled == false)
         {
             // Reset Attack & Target
-            resetTarget();
+            ResetTarget();
             isAttacking = false;
 
             // Get Direction
@@ -520,7 +520,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (canMove)
         {
             // Reset Attack & Target
-            resetTarget();
+            ResetTarget();
             isAttacking = false;
 
             Vector2 readVector = context.ReadValue<Vector2>();
@@ -542,7 +542,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         yield return new WaitForSeconds(weapon.frequency);
     }
 
-    public void hitAttack()
+    public void HitAttack()
     {
         if (attackSuccess)
         {
@@ -619,22 +619,22 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     // Audio
 
-    public void runAudio()
+    public void RunAudio()
     {
         audioSource.PlayOneShot(sfx[0], 0.25f);
     }
 
-    public void attackMeleeAudio()
+    public void AttackMeleeAudio()
     {
         audioSource.PlayOneShot(sfx[1], 0.05f);
     }
 
-    public void attackRangeAudio()
+    public void AttackRangeAudio()
     {
         audioSource.PlayOneShot(sfx[2], 0.05f);
     }
 
-    public void attackRangeArrowAudio()
+    public void AttackRangeArrowAudio()
     {
         audioSource.PlayOneShot(sfx[3], 0.05f);
     }

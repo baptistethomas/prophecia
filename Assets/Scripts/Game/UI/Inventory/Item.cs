@@ -11,6 +11,11 @@ public class Item : MonoBehaviour
 
     public void ItemUsage()
     {
-
+        // Light Healing Potion : +25 life
+        if (id == 11)
+        {
+            if (Player.Instance.currentHealth + 25 < Player.Instance.health) Player.Instance.currentHealth += 25;
+            else Player.Instance.currentHealth = Player.Instance.health;
+        }
     }
 }
