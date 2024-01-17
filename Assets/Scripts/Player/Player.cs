@@ -19,74 +19,99 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     // Player Progress
     public string pseudo;
     public string title;
-    public int experienceTotal;
+    public int experience;
     public int gold;
     public int level;
 
     // Player Stats Attributes
     public int health;
-    public int healthBuff;
-    public int healthMalus;
+    [HideInInspector] public int healthBuff;
+    [HideInInspector] public int healthMalus;
     public int healthFinal;
     public int currentHealth;
     public int healthRegeneration;
-    public int healthRegenerationBuff;
-    public int healthRegenerationMalus;
+    [HideInInspector] public int healthRegenerationBuff;
+    [HideInInspector] public int healthRegenerationMalus;
     public int healthRegenerationFinal;
     public int mana;
-    public int manaBuff;
-    public int manaMalus;
+    [HideInInspector] public int manaBuff;
+    [HideInInspector] public int manaMalus;
     public int manaFinal;
     public int manaRegeneration;
-    public int manaRegenerationBuff;
-    public int manaRegenerationMalus;
-    public int mangaRegenerationFinal;
+    [HideInInspector] public int manaRegenerationBuff;
+    [HideInInspector] public int manaRegenerationMalus;
+    [HideInInspector] public int mangaRegenerationFinal;
     public int currentMana;
     public int encombrement;
 
     // Player Attributes
     public int strenght;
-    public int strenghtBuff;
-    public int strenghtMalus;
+    [HideInInspector] public int strenghtBuff;
+    [HideInInspector] public int strenghtMalus;
     public int strenghtFinal;
     public int endurance;
-    public int enduranceBuff;
-    public int enduranceMalus;
+    [HideInInspector] public int enduranceBuff;
+    [HideInInspector] public int enduranceMalus;
     public int enduranceFinal;
     public int dexterity;
-    public int dexterityBuff;
-    public int dexterityMalus;
+    [HideInInspector] public int dexterityBuff;
+    [HideInInspector] public int dexterityMalus;
     public int dexterityFinal;
     public int intelect;
-    public int intelectBuff;
-    public int intelectMalus;
+    [HideInInspector] public int intelectBuff;
+    [HideInInspector] public int intelectMalus;
     public int intelectFinal;
     public int wisdom;
-    public int wisdomBuff;
-    public int wisdomMalus;
+    [HideInInspector] public int wisdomBuff;
+    [HideInInspector] public int wisdomMalus;
     public int wisdomFinal;
 
     // Player Skills
     public int attack;
-    public int attackBuff;
-    public int attackMalus;
+    [HideInInspector] public int attackBuff;
+    [HideInInspector] public int attackMalus;
     public int attackFinal;
     public int archery;
-    public int archeryBuff;
-    public int archeryMalus;
+    [HideInInspector] public int archeryBuff;
+    [HideInInspector] public int archeryMalus;
     public int archeryFinal;
     public int dodge;
-    public int dodgeBuff;
-    public int dodgeMalus;
+    [HideInInspector] public int dodgeBuff;
+    [HideInInspector] public int dodgeMalus;
     public int dodgeFinal;
     public float armorClass;
-    public float armorClassBuff;
-    public float armorClassMalus;
+    [HideInInspector] public float armorClassBuff;
+    [HideInInspector] public float armorClassMalus;
     public float armorClassFinal;
 
-    // Canvas Health Bars
+    // Remaining Points
+    public int remainingAttributesPoints;
+    public int remainingSkillsPoints;
+
+    // Power
+    private int powerLight;
+    private int powerDark;
+    private int powerFire;
+    private int powerEarth;
+    private int powerAir;
+    private int powerWater;
+
+    // Resist
+    private int resistLight;
+    private int resistDark;
+    private int resistFire;
+    private int resistEarth;
+    private int resistAir;
+    private int resistWater;
+
+    // Canvas Bars
     public RectTransform healthBar;
+    public RectTransform experienceBar;
     public Vector3 healthBarLocalSpace;
+    public Vector3 experienceBarLocalSpace;
+
+    // Canvas
+    public DynamicTextData damageTextData;
 
     // Run Speed
     [SerializeField] public float _speed = 8;
@@ -96,19 +121,19 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public CharacterController characterController;
     public Animator animator;
     public GameObject hands;
-    public Vector3 directionKeyboard;
-    public Vector3 directionMouse;
-    public bool moveToTarget;
+    [HideInInspector] public Vector3 directionKeyboard;
+    [HideInInspector] public Vector3 directionMouse;
+    [HideInInspector] public bool moveToTarget;
 
     private float timeOnLeftClick;
     private float timeBetweenLeftClickDownAndUp = 0.30f;
     private bool leftClick;
-    public bool isAttacking = false;
-    public bool canAttack = true;
-    public bool canMove = true;
+    [HideInInspector] public bool isAttacking = false;
+    [HideInInspector] public bool canAttack = true;
+    [HideInInspector] public bool canMove = true;
 
     // Target Attack
-    public Monster targetMonster;
+    [HideInInspector] public Monster targetMonster;
     public GameObject targetSackGameObject;
     public GameObject hitParticles;
     public GameObject diedParticles;
@@ -161,9 +186,10 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         hands = GameObject.Find("Punch");
         audioSource = GetComponent<AudioSource>();
 
-        // Init Cursos & Health Bar
+        // Init Cursor & Bars
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
         healthBarLocalSpace = healthBar.localScale;
+        experienceBarLocalSpace = experienceBar.localScale;
 
         // Repeat Player Health Regeneration every second
         InvokeRepeating("RegenerateHealthPlayer", 0, 1);
@@ -224,6 +250,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
         // Update Health Player
         UpdateCanvasHealthPlayer();
+
+        // Update Health Player
+        UpdateCanvasExperiencePlayer();
 
         // Manager Left Click being Attack or Move
         LeftClickManager();
@@ -448,8 +477,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             if (weapon.isRange) attackSuccess = Random.Range(1, archeryFinal) >= Random.Range(1, targetMonster.dodge);
 
             StartCoroutine("IAttack");
-
-
         }
     }
 
@@ -458,8 +485,14 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Experience per Hit
         if (damage <= targetMonster.currentHealth) experiencePerHit = damage * (targetMonster.experience / health);
         if (damage > targetMonster.currentHealth) experiencePerHit = currentHealth * (targetMonster.experience / health);
-        experienceTotal += experiencePerHit;
+        experience += experiencePerHit;
 
+    }
+
+    private void UpdateCanvasExperiencePlayer()
+    {
+        float currentExperienceBar = (experience - GetComponent<Level>().currentLevelExperience) / (float)GetComponent<Level>().nextLevelExperience;
+        experienceBar.localScale = new Vector3(currentExperienceBar, experienceBar.localScale.y, experienceBar.localScale.z);
     }
 
     private void UpdateCanvasHealthPlayer()
@@ -475,10 +508,16 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     {
         if (currentHealth < health)
         {
-            currentHealth += health / 100 * healthRegeneration;
+            // We back to Zero is we get lowed than that by big hit
+            if (currentHealth < 0) currentHealth = 0;
+
+            // Calcul the health to add with regeneration
+            int regenerateHealth = health / 100 * healthRegeneration;
+
+            // Add Health
+            if (regenerateHealth > 0) currentHealth += health / 100 * healthRegeneration;
+            if (regenerateHealth == 0) currentHealth += 1;
         }
-        float currentHealthBar = currentHealth / (float)health;
-        if (currentHealth > 0) healthBar.localScale = new Vector3(currentHealthBar * healthBarLocalSpace.x, healthBar.localScale.y, healthBar.localScale.z);
     }
 
     public void OnMoveMouse()
@@ -637,5 +676,15 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public void AttackRangeArrowAudio()
     {
         audioSource.PlayOneShot(sfx[3], 0.05f);
+    }
+
+    public void AttackPunchAudio()
+    {
+        audioSource.PlayOneShot(sfx[5], 0.1f);
+    }
+
+    public void GetHitAudio()
+    {
+        audioSource.PlayOneShot(sfx[4], 0.2f);
     }
 }

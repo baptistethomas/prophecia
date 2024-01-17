@@ -32,7 +32,8 @@ public class Monster : MonoBehaviour
     public int dodge;
 
     // Monster Loot
-    public int gold;
+    public int goldMin;
+    public int goldMax;
     public GameObject lootSack;
     public GameObject[] loot;
     public int[] lootRate;
@@ -148,8 +149,32 @@ public class Monster : MonoBehaviour
                 {
                     meleeDamage = Random.Range(damageMin, damageMax) - (int)(Player.Instance.armorClassFinal);
                     if (Player.Instance.currentHealth > 0)
+                    {
                         Player.Instance.currentHealth -= meleeDamage;
+                        Player.Instance.GetHitAudio();
+
+                        // Show UI Damage
+                        DynamicTextData data = Player.Instance.damageTextData;
+                        Vector3 destination = Player.Instance.transform.position;
+                        destination.x += (Random.value + 0.5f) / 3;
+                        destination.y += (Random.value + 12) / 3;
+                        destination.z += (Random.value - 0.5f) / 3;
+
+                        DynamicTextManager.CreateText(destination, "-" + meleeDamage.ToString(), data);
+                    }
+
                     StartCoroutine("AttackHitThePlayer");
+                }
+                else
+                {
+                    // Show UI Damage
+                    DynamicTextData data = Player.Instance.damageTextData;
+                    Vector3 destination = Player.Instance.transform.position;
+                    destination.x += (Random.value + 0.5f) / 3;
+                    destination.y += (Random.value + 12) / 3;
+                    destination.z += (Random.value - 0.5f) / 3;
+
+                    DynamicTextManager.CreateText(destination, "Dodged!", data);
                 }
             }
         }
@@ -158,7 +183,7 @@ public class Monster : MonoBehaviour
     private void OnMonsterDead()
     {
         // Get Gold
-        Player.Instance.gold += gold;
+        Player.Instance.gold += Random.Range(goldMin, goldMax);
 
         // Get Back default attacks state
         Player.Instance.isAttacking = false;
@@ -275,8 +300,8 @@ public class Monster : MonoBehaviour
 
     public void GetHitAudio()
     {
-        audioSource.PlayOneShot(sfx[1], 0.05f);
-        audioSource.PlayOneShot(sfx[0], 0.05f);
+        audioSource.PlayOneShot(sfx[1], 0.025f);
+        audioSource.PlayOneShot(sfx[0], 0.025f);
     }
 
     IEnumerator AttackPlayer()
