@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -19,7 +20,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     // Player Progress
     public string pseudo;
     public string title;
-    public int experience;
+    public float experience;
     public int gold;
     public int level;
 
@@ -136,7 +137,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public Monster targetMonster;
     public GameObject targetSackGameObject;
     public GameObject hitParticles;
-    public GameObject diedParticles;
+    public GameObject teleportParticles;
     public GameObject lootParticles;
     private GameObject goHitParticles;
     private int damage;
@@ -152,7 +153,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [SerializeField] private float _isBehingObjectDistance = 3;
 
     // XP
-    public int experiencePerHit;
+    private float experiencePerHit;
 
     // SFX
     public AudioClip[] sfx;
@@ -160,6 +161,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     // Inventory
     public bool inventoryEnabled;
+    private Vector3 sanctuaryPosition;
+
 
     // Unity Functions
 
@@ -249,7 +252,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (targetSackGameObject) ContinueToMoveToItem();
 
         // Update Health Player
-        UpdateCanvasHealthPlayer();
+        UpdateHealthPlayer();
 
         // Update Health Player
         UpdateCanvasExperiencePlayer();
@@ -483,25 +486,63 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     private void OnHitGiveExperience()
     {
         // Experience per Hit
-        if (damage <= targetMonster.currentHealth) experiencePerHit = damage * (targetMonster.experience / health);
-        if (damage > targetMonster.currentHealth) experiencePerHit = currentHealth * (targetMonster.experience / health);
+        if (damage <= targetMonster.currentHealth)
+        {
+            experiencePerHit = (float)(damage * Math.Round((targetMonster.experience / targetMonster.health), 2));
+        }
+        if (damage > targetMonster.currentHealth)
+        {
+            experiencePerHit = (float)(targetMonster.currentHealth * Math.Round((targetMonster.experience / targetMonster.health), 2));
+        }
         experience += experiencePerHit;
-
     }
 
     private void UpdateCanvasExperiencePlayer()
     {
-        float currentExperienceBar = (experience - GetComponent<Level>().currentLevelExperience) / (float)GetComponent<Level>().nextLevelExperience;
-        experienceBar.localScale = new Vector3(currentExperienceBar, experienceBar.localScale.y, experienceBar.localScale.z);
+        float currentExperienceBar = (experience - GetComponent<Level>().currentLevelExperience) / GetComponent<Level>().nextLevelExperience;
+        if (currentExperienceBar > 0)
+        {
+            experienceBar.localScale = new Vector3(currentExperienceBar, experienceBar.localScale.y, experienceBar.localScale.z);
+            GameObject.Find("XP Percent").GetComponent<TMPro.TextMeshProUGUI>().text = Math.Round((currentExperienceBar * 100), 2).ToString() + "%";
+        }
+        else
+        {
+            experienceBar.localScale = new Vector3(0, experienceBar.localScale.y, experienceBar.localScale.z);
+            GameObject.Find("XP Percent").GetComponent<TMPro.TextMeshProUGUI>().text = "0%";
+        }
     }
 
-    private void UpdateCanvasHealthPlayer()
+    private void UpdateHealthPlayer()
     {
-        if (healthBar.localScale.x > 0.25f)
+        if (currentHealth > 0)
         {
             float currentHealthBar = currentHealth / (float)health;
             healthBar.localScale = new Vector3(currentHealthBar * healthBarLocalSpace.x, healthBar.localScale.y, healthBar.localScale.z);
         }
+        if (currentHealth <= 0)
+        {
+            GetPlayerDeath();
+        }
+    }
+
+    private void GetPlayerDeath()
+    {
+        audioSource.PlayOneShot(sfx[6], 0.1f);
+        GameObject goTeleportParticles = Instantiate(teleportParticles, new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), Quaternion.identity); ;
+        Destroy(goTeleportParticles, 2);
+        ResetTarget();
+        GetComponent<NavMeshAgent>().enabled = false;
+        transform.position = new Vector3(76, 50, 95);
+        GetComponent<NavMeshAgent>().enabled = true;
+        GetLostExperienceAndGold();
+        currentHealth = 1;
+    }
+
+    private void GetLostExperienceAndGold()
+    {
+        float experienceFromThisLevel = experience - GetComponent<Level>().currentLevelExperience;
+        experience -= (experienceFromThisLevel / 100) * 20;
+        gold -= gold / 10;
     }
 
     private void RegenerateHealthPlayer()

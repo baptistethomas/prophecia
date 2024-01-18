@@ -45,7 +45,9 @@ public class Inventory : MonoBehaviour
 
         if (Player.Instance.inventoryEnabled == true)
         {
-            Player.Instance.ResetTarget();
+            //Player.Instance.ResetTarget();
+            Player.Instance.animator.SetBool("run", false);
+            Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
             inventory.SetActive(true);
             characterStats.SetActive(true);
             ShowAttributes();

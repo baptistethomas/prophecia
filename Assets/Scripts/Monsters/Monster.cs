@@ -25,7 +25,7 @@ public class Monster : MonoBehaviour
     public int meleeDamage;
     public int damageMin;
     public int damageMax;
-    public int experience;
+    public float experience;
 
     // Monster Skills
     public int attack;
