@@ -61,9 +61,14 @@ public class Monster : MonoBehaviour
     public float stopDistance;
     public float meleeRange;
 
+    // Wandering
+    [Range(1, 500)] public float walkRadius;
+
     // SFX
     public AudioClip[] sfx;
     private AudioSource audioSource;
+    private float timePauseWander;
+    private bool isMoving;
 
     private void Awake()
     {
@@ -109,50 +114,96 @@ public class Monster : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, detectDistance);
     }
 
+    private Vector3 RandomNavMeshLocation()
+    {
+        Vector3 finalPosition = Vector3.zero;
+        Vector3 randomPosition = Random.insideUnitSphere * walkRadius;
+        randomPosition += transform.position;
+        if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, walkRadius, 1 << NavMesh.GetAreaFromName("Walkable")))
+        {
+            if (Vector3.Distance(hit.position, initialPosition) <= walkRadius)
+            {
+                finalPosition = hit.position;
+            }
+        }
+        return finalPosition;
+    }
+
+    private void ExtraRotation()
+    {
+        Vector3 lookrotation = agent.steeringTarget - transform.position;
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookrotation), 100 * Time.deltaTime);
+
+    }
+
     private void OnMonsterAlive()
     {
+        // Extra Rotation
+
         // Check Distance Between the Monster and the Player
         float distance = Vector3.Distance(transform.position, Player.Instance.transform.position);
         agent.stoppingDistance = stopDistance;
-
-        if (distance > meleeRange)
+        // Out Distance Detection
+        if (agent != null)
         {
-            // If the Distance is less than detect distance, the monster move to the player until being in melee range of 2
-            if (distance <= detectDistance)
+            if (distance > meleeRange)
             {
-                agent.destination = Player.Instance.transform.position;
-                animator.SetFloat("runSpeed", 1);
-            }
-            // If the player is out of 1.5 detect range after aggro, monster cames back to initial position
-            else if (distance > detectDistance * 1.5f && Vector3.Distance(transform.position, initialPosition) > 3)
-            {
-                agent.destination = initialPosition;
-                animator.SetFloat("runSpeed", 1);
-            }
-            // If the monster is back to his initial positon
-            else if (distance > detectDistance && Vector3.Distance(transform.position, initialPosition) < 3)
-            {
-                animator.SetFloat("runSpeed", 0);
-            }
-        }
-        else
-        {
+                // Extra Rotate direction change during monster moves
+                if (isMoving == true) ExtraRotation();
 
-            // If the Monster is in meleeRange, he attacks
-            if (canAttack)
-            {
-                canAttack = false;
-                animator.SetTrigger("meleeAttack");
-                StartCoroutine("AttackPlayer");
-
-                if (Random.Range(1, attack) >= Random.Range(1, Player.Instance.dodgeFinal))
+                // If the Distance is less than detect distance, the monster move to the player until being in melee range of 2
+                if (distance <= detectDistance)
                 {
-                    meleeDamage = Random.Range(damageMin, damageMax) - (int)(Player.Instance.armorClassFinal);
-                    if (Player.Instance.currentHealth > 0)
+                    agent.destination = Player.Instance.transform.position;
+                    animator.SetFloat("runSpeed", 1);
+                }
+                if (agent.remainingDistance < 1)
+                {
+                    if (timePauseWander + 5 < Time.time)
                     {
-                        Player.Instance.currentHealth -= meleeDamage;
-                        Player.Instance.GetHitAudio();
+                        timePauseWander = Time.time;
+                        agent.SetDestination(RandomNavMeshLocation());
+                        animator.SetFloat("runSpeed", 1);
+                        isMoving = true;
+                    }
+                    else
+                    {
+                        animator.SetFloat("runSpeed", 0);
+                        isMoving = false;
+                    }
+                }
+            }
+            else
+            {
+                // If the Monster is in meleeRange, he attacks
+                if (canAttack)
+                {
+                    canAttack = false;
+                    animator.SetTrigger("meleeAttack");
+                    StartCoroutine("AttackPlayer");
 
+                    if (Random.Range(1, attack) >= Random.Range(1, Player.Instance.dodgeFinal))
+                    {
+                        meleeDamage = Random.Range(damageMin, damageMax) - (int)(Player.Instance.armorClassFinal);
+                        if (Player.Instance.currentHealth > 0)
+                        {
+                            Player.Instance.currentHealth -= meleeDamage;
+                            Player.Instance.GetHitAudio();
+
+                            // Show UI Damage
+                            DynamicTextData data = Player.Instance.damageTextData;
+                            Vector3 destination = Player.Instance.transform.position;
+                            destination.x += (Random.value + 0.5f) / 3;
+                            destination.y += (Random.value + 12) / 3;
+                            destination.z += (Random.value - 0.5f) / 3;
+
+                            DynamicTextManager.CreateText(destination, "-" + meleeDamage.ToString(), data);
+                        }
+
+                        StartCoroutine("AttackHitThePlayer");
+                    }
+                    else
+                    {
                         // Show UI Damage
                         DynamicTextData data = Player.Instance.damageTextData;
                         Vector3 destination = Player.Instance.transform.position;
@@ -160,21 +211,8 @@ public class Monster : MonoBehaviour
                         destination.y += (Random.value + 12) / 3;
                         destination.z += (Random.value - 0.5f) / 3;
 
-                        DynamicTextManager.CreateText(destination, "-" + meleeDamage.ToString(), data);
+                        DynamicTextManager.CreateText(destination, "Dodged!", data);
                     }
-
-                    StartCoroutine("AttackHitThePlayer");
-                }
-                else
-                {
-                    // Show UI Damage
-                    DynamicTextData data = Player.Instance.damageTextData;
-                    Vector3 destination = Player.Instance.transform.position;
-                    destination.x += (Random.value + 0.5f) / 3;
-                    destination.y += (Random.value + 12) / 3;
-                    destination.z += (Random.value - 0.5f) / 3;
-
-                    DynamicTextManager.CreateText(destination, "Dodged!", data);
                 }
             }
         }
@@ -240,17 +278,16 @@ public class Monster : MonoBehaviour
         yield return new WaitForSeconds(waitTime);
     }
 
-
     IEnumerator RespawnDeadMonster()
     {
         isWaitingForRespawn = true;
         yield return StartCoroutine(Wait(30));
+        transform.position = initialPosition;
         currentHealth = health;
         animator.SetTrigger("idle");
         GetComponent<Collider>().enabled = true;
         GetComponent<NavMeshAgent>().enabled = true;
         isDead = false;
-        transform.position = initialPosition;
         isWaitingForRespawn = false;
         agent.isStopped = false;
         agent.ResetPath();

@@ -30,10 +30,32 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             Armor armor = slotContentGameObject.GetComponent<Armor>();
 
             // Weapon
-            if (weapon != null) EquipWeaponSlot(weapon);
+            if (weapon != null)
+            {
+                // Check requirements
+                if (weapon.requiredStrenght > Player.Instance.strenght) return; // To do : Add log message
+                if (weapon.requiredEndurance > Player.Instance.endurance) return; // To do : Add log message
+                if (weapon.requiredDexterity > Player.Instance.dexterity) return; // To do : Add log message
+                if (weapon.requiredIntelect > Player.Instance.intelect) return; // To do : Add log message
+                if (weapon.requiredWisdom > Player.Instance.wisdom) return; // To do : Add log message
+
+                // Equip if requirements are passed
+                EquipWeaponSlot(weapon);
+            }
 
             // Armor part
-            if (armor != null) EquipArmorSlot(armor);
+            if (armor != null)
+            {
+                // Check requirements
+                if (armor.requiredStrenght > Player.Instance.strenght) return; // To do : Add log message
+                if (armor.requiredEndurance > Player.Instance.endurance) return; // To do : Add log message
+                if (armor.requiredDexterity > Player.Instance.dexterity) return; // To do : Add log message
+                if (armor.requiredIntelect > Player.Instance.intelect) return; // To do : Add log message
+                if (armor.requiredWisdom > Player.Instance.wisdom) return; // To do : Add log message
+
+                // Equip if requirements are passed
+                EquipArmorSlot(armor);
+            }
 
             // Reset Player Target
             Player.Instance.ResetTarget();
