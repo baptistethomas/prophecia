@@ -119,7 +119,7 @@ public class Monster : MonoBehaviour
         Vector3 finalPosition = Vector3.zero;
         Vector3 randomPosition = Random.insideUnitSphere * walkRadius;
         randomPosition += transform.position;
-        if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, walkRadius, 1 << NavMesh.GetAreaFromName("Walkable")))
+        if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, walkRadius, 1))
         {
             if (Vector3.Distance(hit.position, initialPosition) <= walkRadius)
             {
@@ -157,7 +157,7 @@ public class Monster : MonoBehaviour
                     agent.destination = Player.Instance.transform.position;
                     animator.SetFloat("runSpeed", 1);
                 }
-                if (agent.remainingDistance < 1)
+                if (agent.remainingDistance < stopDistance)
                 {
                     if (timePauseWander + 5 < Time.time)
                     {

@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
-using Cursor = UnityEngine.Cursor;
 using Random = UnityEngine.Random;
 
 public class Player : MonoBehaviour, Controls.IPlayerActions
@@ -90,20 +89,56 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public int remainingSkillsPoints;
 
     // Power
-    private int powerLight;
-    private int powerDark;
-    private int powerFire;
-    private int powerEarth;
-    private int powerAir;
-    private int powerWater;
+    public int powerLight;
+    [HideInInspector] public int powerLightBuff;
+    [HideInInspector] public int powerLightMalus;
+    public int powerLightFinal;
+    public int powerDark;
+    [HideInInspector] public int powerDarkBuff;
+    [HideInInspector] public int powerDarkMalus;
+    public int powerDarkFinal;
+    public int powerFire;
+    [HideInInspector] public int powerFireBuff;
+    [HideInInspector] public int powerFireMalus;
+    public int powerFireFinal;
+    public int powerEarth;
+    [HideInInspector] public int powerEarthBuff;
+    [HideInInspector] public int powerEarthMalus;
+    public int powerEarthFinal;
+    public int powerAir;
+    [HideInInspector] public int powerAirBuff;
+    [HideInInspector] public int powerAirMalus;
+    public int powerAirFinal;
+    public int powerWater;
+    [HideInInspector] public int powerWaterBuff;
+    [HideInInspector] public int powerWaterMalus;
+    public int powerWaterFinal;
 
     // Resist
-    private int resistLight;
-    private int resistDark;
-    private int resistFire;
-    private int resistEarth;
-    private int resistAir;
-    private int resistWater;
+    public int resistLight;
+    [HideInInspector] public int resistLightBuff;
+    [HideInInspector] public int resistLightMalus;
+    public int resistLightFinal;
+    public int resistDark;
+    [HideInInspector] public int resistDarkBuff;
+    [HideInInspector] public int resistDarkMalus;
+    public int resistDarkFinal;
+    public int resistFire;
+    [HideInInspector] public int resistFireBuff;
+    [HideInInspector] public int resistFireMalus;
+    public int resistFireFinal;
+    public int resistEarth;
+    [HideInInspector] public int resistEarthBuff;
+    [HideInInspector] public int resistEarthMalus;
+    public int resistEarthFinal;
+    public int resistAir;
+    [HideInInspector] public int resistAirBuff;
+    [HideInInspector] public int resistAirMalus;
+    public int resistAirFinal;
+    public int resistWater;
+    [HideInInspector] public int resistWaterBuff;
+    [HideInInspector] public int resistWaterMalus;
+    public int resistWaterFinal;
 
     // Canvas Bars
     public RectTransform healthBar;
@@ -127,7 +162,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public bool moveToTarget;
 
     private float timeOnLeftClick;
-    private float timeBetweenLeftClickDownAndUp = 0.30f;
+    private float timeBetweenLeftClickDownAndUp = 0.20f;
     private bool leftClick;
     [HideInInspector] public bool isAttacking = false;
     [HideInInspector] public bool canAttack = true;
@@ -244,6 +279,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Refresh Skills, buff & malus care
         CurrentSkills();
 
+        // Refresh Power & Resist
+        CurrentPowersAndResists();
+
         // Try attacking a valid target
         if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
 
@@ -284,6 +322,22 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         manaFinal = mana + manaBuff - manaMalus;
     }
 
+    public void CurrentPowersAndResists()
+    {
+        powerFireFinal = powerFire + powerFireBuff - powerFireMalus;
+        powerEarthFinal = powerEarth + powerEarthBuff - powerEarthMalus;
+        powerAirFinal = powerAir + powerAirBuff - powerAirMalus;
+        powerWaterFinal = powerWater + powerWaterBuff - powerWaterMalus;
+        powerLightFinal = powerLight + powerLightBuff - powerLightMalus;
+        powerDarkFinal = powerDark + powerDarkBuff - powerDarkMalus;
+        resistFireFinal = resistFire + resistFireBuff - resistFireMalus;
+        resistEarthFinal = resistEarth + resistEarthBuff - resistEarthMalus;
+        resistAirFinal = resistAir + resistAirBuff - resistAirMalus;
+        resistWaterFinal = resistWater + resistWaterBuff - resistWaterMalus;
+        resistLightFinal = resistLight + resistLightBuff - resistLightMalus;
+        resistDarkFinal = resistDark + resistDarkBuff - resistDarkMalus;
+    }
+
     public void CurrentSkills()
     {
         attackFinal = attack + attackBuff - attackMalus;
@@ -302,7 +356,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         animator.SetBool("rangeAttack", false);
         animator.SetBool("handAttack", false);
         animator.SetBool("run", false);
-        Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
+        //Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
     }
 
     private void KeyboardMoveManager()
@@ -355,7 +409,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
             // Run Animation On
             animator.SetBool("run", false);
-            Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
+            //Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
 
             if ((Time.time - timeOnLeftClick) < timeBetweenLeftClickDownAndUp)
             {
@@ -541,7 +595,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     private void GetLostExperienceAndGold()
     {
-        float experienceFromThisLevel = experience - GetComponent<Level>().currentLevelExperience;
+        float experienceFromThisLevel = experience - GameObject.Find("Game Manager").GetComponent<Level>().currentLevelExperience;
         experience -= (experienceFromThisLevel / 100) * 20;
         gold -= gold / 10;
     }
