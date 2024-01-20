@@ -159,8 +159,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public AudioClip[] sfx;
     private AudioSource audioSource;
 
-    // Inventory
-    public bool inventoryEnabled;
+    // Sanctuary
     private Vector3 sanctuaryPosition;
 
 
@@ -281,6 +280,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         dexterityFinal = dexterity + dexterityBuff - dexterityMalus;
         intelectFinal = intelect + intelectBuff - intelectMalus;
         wisdomFinal = wisdom + wisdomBuff - wisdomMalus;
+        healthFinal = health + healthBuff - healthMalus;
+        manaFinal = mana + manaBuff - manaMalus;
     }
 
     public void CurrentSkills()
@@ -499,7 +500,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     private void UpdateCanvasExperiencePlayer()
     {
-        float currentExperienceBar = (experience - GetComponent<Level>().currentLevelExperience) / GetComponent<Level>().nextLevelExperience;
+        float currentExperienceBar = (experience - GameObject.Find("Game Manager").GetComponent<Level>().currentLevelExperience) / GameObject.Find("Game Manager").GetComponent<Level>().nextLevelExperience;
         if (currentExperienceBar > 0)
         {
             experienceBar.localScale = new Vector3(currentExperienceBar, experienceBar.localScale.y, experienceBar.localScale.z);
@@ -563,7 +564,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void OnMoveMouse()
     {
-        if (canMove && inventoryEnabled == false)
+        if (canMove && GameManager.Instance.inventoryEnabled == false)
         {
             // Reset Attack & Target
             ResetTarget();

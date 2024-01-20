@@ -299,6 +299,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 
         // Back to Inventory
         Item item = slotEquiped.transform.GetChild(2).gameObject.GetComponent<Item>();
-        Player.Instance.GetComponent<Inventory>().AddItem(item.gameObject, item.id, item.type, item.description, item.icon);
+        GameManager.Instance.GetComponent<Inventory>().AddItem(item.gameObject, item.id, item.type, item.description, item.icon);
     }
 }

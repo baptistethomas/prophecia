@@ -40,14 +40,14 @@ public class Inventory : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.I))
         {
-            Player.Instance.inventoryEnabled = !Player.Instance.inventoryEnabled;
+            GameManager.Instance.inventoryEnabled = !GameManager.Instance.inventoryEnabled;
+            GameManager.Instance.CloseUIWindow();
+            Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
         }
 
-        if (Player.Instance.inventoryEnabled == true)
+        if (GameManager.Instance.inventoryEnabled == true)
         {
-            //Player.Instance.ResetTarget();
             Player.Instance.animator.SetBool("run", false);
-            Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
             inventory.SetActive(true);
             characterStats.SetActive(true);
             ShowAttributes();

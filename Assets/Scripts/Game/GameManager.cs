@@ -11,6 +11,17 @@ public class GameManager : MonoBehaviour
         get { return _instance; }
     }
 
+    // Windows UI Management
+
+    // Inventory, Character Sheets & Others UI Windows
+    public bool inventoryEnabled;
+    public bool characterSheetEnabled;
+    public bool groupEnabled;
+    public bool macroEnabled;
+    public bool spellsEnabled;
+    public bool optionsEnabled;
+    public bool guildEnabled;
+
     // GameManager Settings
     public int experienceRate;
 
@@ -23,18 +34,44 @@ public class GameManager : MonoBehaviour
         }
 
         _instance = this;
-        //DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(this.gameObject);
     }
-
-    // Start is called before the first frame update
-    void Start()
+    public void CloseUIWindow()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        if (GameObject.Find("Inventory") != null)
+        {
+            GameObject.Find("Inventory").SetActive(false);
+            inventoryEnabled = false;
+        }
+        if (GameObject.Find("Character Sheet") != null)
+        {
+            GameObject.Find("Character Sheet").SetActive(false);
+            characterSheetEnabled = false;
+        }
+        if (GameObject.Find("Spells") != null)
+        {
+            GameObject.Find("Spells").SetActive(false);
+            spellsEnabled = false;
+        }
+        if (GameObject.Find("Guild") != null)
+        {
+            GameObject.Find("Guild").SetActive(false);
+            guildEnabled = false;
+        }
+        if (GameObject.Find("Group") != null)
+        {
+            GameObject.Find("Group").SetActive(false);
+            groupEnabled = false;
+        }
+        if (GameObject.Find("Macro") != null)
+        {
+            GameObject.Find("Macro").SetActive(false);
+            macroEnabled = false;
+        }
+        if (GameObject.Find("Options") != null)
+        {
+            GameObject.Find("Options").SetActive(false);
+            optionsEnabled = false;
+        }
     }
 }
