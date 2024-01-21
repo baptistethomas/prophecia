@@ -132,8 +132,7 @@ public class Monster : MonoBehaviour
     private void ExtraRotation()
     {
         Vector3 lookrotation = agent.steeringTarget - transform.position;
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookrotation), 100 * Time.deltaTime);
-
+        if (lookrotation != Vector3.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookrotation), 100 * Time.deltaTime);
     }
 
     private void OnMonsterAlive()

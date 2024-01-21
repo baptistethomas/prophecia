@@ -86,6 +86,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             PutAwayRightHand();
             EquipRightHandWeapon(weapon);
         }
+        return;
     }
 
     public void EquipArmorPart(Armor armor)
