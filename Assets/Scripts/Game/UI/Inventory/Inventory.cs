@@ -53,6 +53,7 @@ public class Inventory : MonoBehaviour
             ShowAttributes();
             CurrentCountOfItems();
             CurrentGoldAmount();
+            CurrentEncumbrance();
         }
         else
         {
@@ -183,6 +184,13 @@ public class Inventory : MonoBehaviour
     {
         GameObject goldInventory = GameObject.Find("Gold");
         goldInventory.transform.Find("Gold Amount").GetComponent<TMPro.TextMeshProUGUI>().text = Player.Instance.gold.ToString();
+    }
+
+    public void CurrentEncumbrance()
+    {
+        GameObject encumbranceInventory = GameObject.Find("Encumbrance");
+        encumbranceInventory.transform.Find("Encumbrance Amount").GetComponent<TMPro.TextMeshProUGUI>().text =
+            Player.Instance.currentEncumbrance.ToString() + " / " + Player.Instance.encumbrance.ToString();
     }
 
     public void CurrentCountOfItems()

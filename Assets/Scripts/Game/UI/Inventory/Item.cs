@@ -4,6 +4,9 @@ public class Item : MonoBehaviour
 {
     public int id;
     public string type;
+    public int encumbrance;
+    public int buyPrice;
+    public int sellPrice;
     public string description;
     public Sprite icon;
     public bool pickedUp;

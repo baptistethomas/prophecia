@@ -53,7 +53,6 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler
                             Player.Instance.armorClassBuff -= slotGameObject.GetComponent<Armor>().armorClass;
                             Player.Instance.dodgeBuff -= slotGameObject.GetComponent<Armor>().bonusDodge;
                             Player.Instance.dodgeMalus -= slotGameObject.GetComponent<Armor>().malusDodge;
-                            Player.Instance.encombrement -= slotGameObject.GetComponent<Armor>().encombrement;
 
                             // Back in inventory
                             if (armorSlot.transform.childCount == 3) ResetEquipedSlot(armorSlot);

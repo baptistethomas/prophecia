@@ -17,7 +17,7 @@ public class Level : MonoBehaviour
     {
         // Level Steps
         experienceLevel.Add(0);
-        experienceLevel.Add(100);
+        experienceLevel.Add(10);
         experienceLevel.Add(5700);
         experienceLevel.Add(15900);
         experienceLevel.Add(33000);

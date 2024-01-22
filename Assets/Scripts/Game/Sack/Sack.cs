@@ -31,12 +31,17 @@ public class Sack : MonoBehaviour
             for (int i = 0; i < items.Count; i++)
             {
                 Item item = items[i].GetComponent<Item>();
-                GameObject instantiateItem = Instantiate(items[i]);
-                GameObject.Find("Game Manager").GetComponent<Inventory>().AddItem(instantiateItem, item.id, item.type, item.description, item.icon);
-                Player.Instance.ResetTarget();
-            }
+                if (item.encumbrance < Player.Instance.leftEncumbrance)
+                {
+                    GameObject instantiateItem = Instantiate(items[i]);
+                    GameObject.Find("Game Manager").GetComponent<Inventory>().AddItem(instantiateItem, item.id, item.type, item.description, item.icon);
+                    Player.Instance.currentEncumbrance += item.encumbrance;
+                    items.Remove(item.gameObject);
+                }
 
-            Destroy(gameObject);
+            }
+            Player.Instance.ResetTarget();
+            if (items.Count == 0) Destroy(gameObject);
             return;
         }
     }

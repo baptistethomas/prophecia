@@ -18,9 +18,6 @@ public class Armor : MonoBehaviour
     public int requiredWisdom;
     public int requiredIntelect;
 
-    // Enc
-    public int encombrement;
-
     // Bonus
     public int bonusStrenght;
     public int bonusEndurance;

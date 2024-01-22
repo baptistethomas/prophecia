@@ -42,7 +42,11 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public int manaRegenerationMalus;
     [HideInInspector] public int mangaRegenerationFinal;
     public int currentMana;
-    public int encombrement;
+
+    // Encumbrance
+    public int encumbrance;
+    public int currentEncumbrance;
+    public int leftEncumbrance;
 
     // Player Attributes
     public int strenght;
@@ -297,6 +301,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Refresh Power & Resist
         CurrentPowersAndResists();
 
+        // Refresh Current Encombrement
+        CurrentEncumbrance();
+
         // Try attacking a valid target
         if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
 
@@ -323,6 +330,12 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     }
 
     // Custom Functions
+
+    public void CurrentEncumbrance()
+    {
+        encumbrance = (Player.Instance.strenghtFinal * 500) / (Player.Instance.strenghtFinal + 100);
+        leftEncumbrance = encumbrance - currentEncumbrance;
+    }
 
     public void CurrentArmorClass()
     {

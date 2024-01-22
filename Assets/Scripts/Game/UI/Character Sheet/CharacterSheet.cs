@@ -190,7 +190,7 @@ public class CharacterSheet : MonoBehaviour
                             GameObject attackAttributeValue = attackAttribute.transform.Find("Value").gameObject;
                             if (attackAttributeValue != null)
                             {
-                                attackAttributeValue.GetComponent<TMPro.TextMeshProUGUI>().text = (Player.Instance.attackFinal + Player.Instance.attackTemp).ToString() + " / " + (Player.Instance.attackFinal + Player.Instance.attackTemp).ToString();
+                                attackAttributeValue.GetComponent<TMPro.TextMeshProUGUI>().text = (Player.Instance.attackFinal + Player.Instance.attackTemp).ToString() + " / " + (Player.Instance.attack + Player.Instance.attackTemp).ToString();
                             }
                             GameObject modify = attackAttribute.transform.Find("Modify").gameObject;
                             ShowOrHideSkillModify(modify);
@@ -203,7 +203,7 @@ public class CharacterSheet : MonoBehaviour
                             GameObject archeryAttributeValue = archeryAttribute.transform.Find("Value").gameObject;
                             if (archeryAttributeValue != null)
                             {
-                                archeryAttributeValue.GetComponent<TMPro.TextMeshProUGUI>().text = (Player.Instance.archeryFinal + Player.Instance.archeryTemp).ToString() + " / " + (Player.Instance.archeryFinal + Player.Instance.archeryTemp).ToString();
+                                archeryAttributeValue.GetComponent<TMPro.TextMeshProUGUI>().text = (Player.Instance.archeryFinal + Player.Instance.archeryTemp).ToString() + " / " + (Player.Instance.archery + Player.Instance.archeryTemp).ToString();
                             }
                             GameObject modify = archeryAttribute.transform.Find("Modify").gameObject;
                             ShowOrHideSkillModify(modify);
@@ -216,7 +216,7 @@ public class CharacterSheet : MonoBehaviour
                             GameObject dodgeAttributeValue = dodgeAttribute.transform.Find("Value").gameObject;
                             if (dodgeAttributeValue != null)
                             {
-                                dodgeAttributeValue.GetComponent<TMPro.TextMeshProUGUI>().text = (Player.Instance.dodgeFinal + Player.Instance.dodgeTemp).ToString() + " / " + (Player.Instance.dodgeFinal + Player.Instance.dodgeTemp).ToString();
+                                dodgeAttributeValue.GetComponent<TMPro.TextMeshProUGUI>().text = (Player.Instance.dodgeFinal + Player.Instance.dodgeTemp).ToString() + " / " + (Player.Instance.dodge + Player.Instance.dodgeTemp).ToString();
                             }
                             GameObject modify = dodgeAttribute.transform.Find("Modify").gameObject;
                             ShowOrHideSkillModify(modify);

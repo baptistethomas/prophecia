@@ -125,7 +125,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler
                     Player.Instance.armorClassBuff += armor.armorClass;
                     Player.Instance.dodgeBuff += armor.bonusDodge;
                     Player.Instance.dodgeMalus += armor.malusDodge;
-                    Player.Instance.encombrement += armor.encombrement;
 
                     // Clean Inventory Slot
                     UpdateInventorySlot();
@@ -295,7 +294,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler
             Player.Instance.armorClassBuff -= slotEquiped.GetComponent<Armor>().armorClass;
             Player.Instance.dodgeBuff -= slotEquiped.GetComponent<Armor>().bonusDodge;
             Player.Instance.dodgeMalus -= slotEquiped.GetComponent<Armor>().malusDodge;
-            Player.Instance.encombrement -= slotEquiped.GetComponent<Armor>().encombrement;
         }
 
         // Back to Inventory
