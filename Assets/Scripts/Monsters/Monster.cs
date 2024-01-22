@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using Cursor = UnityEngine.Cursor;
 using Random = UnityEngine.Random;
 
 public class Monster : MonoBehaviour
@@ -69,6 +71,8 @@ public class Monster : MonoBehaviour
     private AudioSource audioSource;
     private float timePauseWander;
     private bool isMoving;
+    private GameObject labelMonsterGo;
+    private GameObject canvas;
 
     private void Awake()
     {
@@ -95,6 +99,7 @@ public class Monster : MonoBehaviour
     {
         // Update Health Monster
         UpdateCanvasHealthMonster();
+        UpdateCanvasMonsterNamePosition();
 
         if (currentHealth <= 0) isDead = true;
         if (isDead == false) OnMonsterAlive();
@@ -293,6 +298,55 @@ public class Monster : MonoBehaviour
         childHealthBar.localScale = healthBarLocalSpace;
     }
 
+    private void ShowMonsterName()
+    {
+        GameObject ui = GameObject.Find("UI").gameObject;
+
+        if (ui != null)
+        {
+            canvas = ui.transform.Find("Canvas").gameObject;
+            if (canvas != null)
+            {
+                GameObject labelMonster = canvas.transform.Find("Label Monster").gameObject;
+                if (labelMonster != null)
+                {
+                    if (!labelMonsterGo)
+                    {
+                        labelMonsterGo = Instantiate(labelMonster, transform.position, Quaternion.identity);
+                        labelMonsterGo.transform.SetParent(canvas.transform);
+                        GameObject nameMonster = labelMonsterGo.transform.Find("Monster Name").gameObject;
+                        if (nameMonster != null)
+                        {
+                            Vector2 nameMonsterSize = nameMonster.transform.GetComponent<RectTransform>().sizeDelta;
+                            nameMonster.GetComponent<TextMeshProUGUI>().text = name;
+                            labelMonsterGo.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(nameMonsterSize.x + 3, nameMonsterSize.y + 3);
+                            labelMonsterGo.SetActive(true);
+                        }
+                        Destroy(labelMonsterGo, 5);
+                    }
+                }
+            }
+        }
+    }
+
+    private void UpdateCanvasMonsterNamePosition()
+    {
+        if (canvas && labelMonsterGo) labelMonsterGo.transform.position =
+                worldToUISpace(canvas.transform.GetComponent<Canvas>(), new Vector3(transform.position.x, transform.position.y + 3.1f, transform.position.z));
+    }
+
+    public Vector3 worldToUISpace(Canvas parentCanvas, Vector3 worldPos)
+    {
+        //Convert the world for screen point so that it can be used with ScreenPointToLocalPointInRectangle function
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+        Vector2 movePos;
+
+        //Convert the screenpoint to ui rectangle local point
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, screenPos, parentCanvas.worldCamera, out movePos);
+        //Convert the local point to world point
+        return parentCanvas.transform.TransformPoint(movePos);
+    }
+
     private void OnMouseOver()
     {
         if (isDead == false)
@@ -301,11 +355,7 @@ public class Monster : MonoBehaviour
             if (Player.Instance.weapon.isMelee) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
             if (Player.Instance.weapon.isRange) Cursor.SetCursor(CustomCursor.Instance.cursorRangeAttack, Vector2.zero, CursorMode.Auto);
         }
-        // Show monster name on right click
-        if (Input.GetMouseButtonDown(1))
-        {
-            DynamicTextManager.CreateText(new Vector3(transform.position.x, transform.position.y + 2.2f, transform.position.z), name.ToString(), damageTextData);
-        }
+        if (Input.GetMouseButtonDown(1)) ShowMonsterName();
     }
     private void OnMouseExit()
     {
