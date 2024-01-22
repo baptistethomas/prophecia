@@ -172,7 +172,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     // Moves & Attack
     public CharacterController characterController;
     public Animator animator;
-    public GameObject hands;
+    [HideInInspector] public GameObject hands;
     [HideInInspector] public Vector3 directionKeyboard;
     [HideInInspector] public Vector3 directionMouse;
     [HideInInspector] public bool moveToTarget;
@@ -180,24 +180,25 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     private float timeOnLeftClick;
     private float timeBetweenLeftClickDownAndUp = 0.20f;
     private bool leftClick;
-    [HideInInspector] public bool isAttacking = false;
-    [HideInInspector] public bool canAttack = true;
-    [HideInInspector] public bool canMove = true;
+    public bool isAttacking = false;
+    public bool canAttack = true;
+    public bool canMove = true;
 
     // Target Attack
     [HideInInspector] public Monster targetMonster;
-    public GameObject targetSackGameObject;
+    [HideInInspector] public GameObject targetSackGameObject;
     public GameObject hitParticles;
     public GameObject teleportParticles;
     public GameObject lootParticles;
     private GameObject goHitParticles;
     private int damage;
+    private int naturalDamageFromAttributes;
     private float nextAttack = 0;
     private bool attackSuccess;
 
     // Items
     public Weapon weapon;
-    public Item item;
+    [HideInInspector] public Item item;
 
     // Colliders
     [SerializeField] private float _colliderDistance = 2;
@@ -622,11 +623,11 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     private void GetPlayerDeath()
     {
+        ResetTarget();
+        GetComponent<NavMeshAgent>().enabled = false;
         audioSource.PlayOneShot(sfx[6], 0.1f);
         GameObject goTeleportParticles = Instantiate(teleportParticles, new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), Quaternion.identity); ;
         Destroy(goTeleportParticles, 2);
-        ResetTarget();
-        GetComponent<NavMeshAgent>().enabled = false;
         transform.position = new Vector3(76, 50, 95);
         GetComponent<NavMeshAgent>().enabled = true;
         GetLostExperienceAndGold();
@@ -730,7 +731,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (weapon.isHand) animator.SetBool("handAttack", true);
         if (weapon.isMelee) animator.SetBool("meleeAttack", true);
         if (weapon.isRange) animator.SetBool("rangeAttack", true);
-        damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix;
+        GetNaturalDamageFromAttributes();
+        damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix + naturalDamageFromAttributes;
         yield return new WaitForSeconds(weapon.frequency);
     }
 
@@ -807,6 +809,13 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
             DynamicTextManager.CreateText(destination, "Dodged!", data);
         }
+    }
+
+    private void GetNaturalDamageFromAttributes()
+    {
+        if (weapon.isMelee || weapon.isHand) naturalDamageFromAttributes = (strenghtFinal - 20) / 5;
+        if (weapon.isRange) naturalDamageFromAttributes = ((strenghtFinal - 20) / 20) + ((dexterityFinal - 20) / 10);
+        if (naturalDamageFromAttributes < 0) naturalDamageFromAttributes = 0;
     }
 
     // Audio
