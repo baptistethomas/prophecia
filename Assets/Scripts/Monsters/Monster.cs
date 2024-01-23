@@ -307,22 +307,29 @@ public class Monster : MonoBehaviour
             canvas = ui.transform.Find("Canvas").gameObject;
             if (canvas != null)
             {
-                GameObject labelMonster = canvas.transform.Find("Label Monster").gameObject;
+                GameObject labelMonster = canvas.transform.Find("Label Monster or Npc").gameObject;
                 if (labelMonster != null)
                 {
                     if (!labelMonsterGo)
                     {
                         labelMonsterGo = Instantiate(labelMonster, transform.position, Quaternion.identity);
                         labelMonsterGo.transform.SetParent(canvas.transform);
-                        GameObject nameMonster = labelMonsterGo.transform.Find("Monster Name").gameObject;
-                        if (nameMonster != null)
+                        GameObject backgroundNameMonster = labelMonsterGo.transform.Find("Background").gameObject;
+                        if (backgroundNameMonster != null)
                         {
-                            Vector2 nameMonsterSize = nameMonster.transform.GetComponent<RectTransform>().sizeDelta;
-                            nameMonster.GetComponent<TextMeshProUGUI>().text = name;
-                            labelMonsterGo.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(nameMonsterSize.x + 3, nameMonsterSize.y + 3);
-                            labelMonsterGo.SetActive(true);
+                            GameObject nameMonster = backgroundNameMonster.transform.Find("Monster or Npc Name").gameObject;
+                            if (nameMonster != null)
+                            {
+                                TextMeshProUGUI labelText = nameMonster.GetComponent<TextMeshProUGUI>();
+                                labelText.text = name;
+                                float scaleFactor = Screen.width / 1920f;
+                                labelText.fontSize = Mathf.RoundToInt(18f * scaleFactor);
+                                Vector2 labelTextDimensions = labelText.GetPreferredValues();
+                                backgroundNameMonster.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(labelTextDimensions.x + 16, 40);
+                                labelMonsterGo.SetActive(true);
+                            }
+                            Destroy(labelMonsterGo, 5);
                         }
-                        Destroy(labelMonsterGo, 5);
                     }
                 }
             }
@@ -337,13 +344,9 @@ public class Monster : MonoBehaviour
 
     public Vector3 worldToUISpace(Canvas parentCanvas, Vector3 worldPos)
     {
-        //Convert the world for screen point so that it can be used with ScreenPointToLocalPointInRectangle function
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
         Vector2 movePos;
-
-        //Convert the screenpoint to ui rectangle local point
         RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, screenPos, parentCanvas.worldCamera, out movePos);
-        //Convert the local point to world point
         return parentCanvas.transform.TransformPoint(movePos);
     }
 
