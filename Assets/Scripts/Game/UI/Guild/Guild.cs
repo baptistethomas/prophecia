@@ -5,7 +5,7 @@ public class Guild : MonoBehaviour
     public GameObject guild;
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.guildEnabled = !GameManager.Instance.guildEnabled;
             GameManager.Instance.CloseUIWindow();

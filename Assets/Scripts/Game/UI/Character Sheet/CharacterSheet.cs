@@ -7,7 +7,7 @@ public class CharacterSheet : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.C) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.characterSheetEnabled = !GameManager.Instance.characterSheetEnabled;
             GameManager.Instance.CloseUIWindow();

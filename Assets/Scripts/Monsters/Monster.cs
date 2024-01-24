@@ -325,7 +325,7 @@ public class Monster : MonoBehaviour
                                 float scaleFactor = Screen.width / 1920f;
                                 labelText.fontSize = Mathf.RoundToInt(18f * scaleFactor);
                                 Vector2 labelTextDimensions = labelText.GetPreferredValues();
-                                backgroundNameMonster.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(labelTextDimensions.x + 16, 40);
+                                backgroundNameMonster.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(labelTextDimensions.x + 16 * scaleFactor, 32 * scaleFactor);
                                 labelMonsterGo.SetActive(true);
                             }
                             Destroy(labelMonsterGo, 5);

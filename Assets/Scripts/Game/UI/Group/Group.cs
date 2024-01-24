@@ -6,7 +6,7 @@ public class Group : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.G))
+        if (Input.GetKeyDown(KeyCode.G) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.groupEnabled = !GameManager.Instance.groupEnabled;
             GameManager.Instance.CloseUIWindow();

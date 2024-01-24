@@ -24,6 +24,7 @@ public class CustomCursor : MonoBehaviour
     public Texture2D cursorMeleeAttack;
     public Texture2D cursorRangeAttack;
     public Texture2D cursorPickItem;
+    public Texture2D cursorChat;
     public CursorMode cursorMode = CursorMode.Auto;
 
     void Awake()

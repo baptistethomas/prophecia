@@ -6,7 +6,7 @@ public class Options : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.O) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.optionsEnabled = !GameManager.Instance.optionsEnabled;
             GameManager.Instance.CloseUIWindow();

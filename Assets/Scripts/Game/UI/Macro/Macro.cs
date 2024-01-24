@@ -6,7 +6,7 @@ public class Macro : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Y))
+        if (Input.GetKeyDown(KeyCode.Y) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.macroEnabled = !GameManager.Instance.macroEnabled;
             GameManager.Instance.CloseUIWindow();

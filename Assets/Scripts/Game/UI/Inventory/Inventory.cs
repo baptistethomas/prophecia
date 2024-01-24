@@ -38,7 +38,7 @@ public class Inventory : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.I) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.inventoryEnabled = !GameManager.Instance.inventoryEnabled;
             GameManager.Instance.CloseUIWindow();

@@ -184,9 +184,10 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public bool canAttack = true;
     public bool canMove = true;
 
-    // Target Attack
+    // Target
     [HideInInspector] public Monster targetMonster;
     [HideInInspector] public GameObject targetSackGameObject;
+    [HideInInspector] public GameObject targetNpcGameObject;
     public GameObject hitParticles;
     public GameObject teleportParticles;
     public GameObject lootParticles;
@@ -213,6 +214,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     // Sanctuary
     private Vector3 sanctuaryPosition;
+
+    // Player Chat
+    [HideInInspector] public bool isFocusedChat;
 
 
     // Unity Functions
@@ -308,8 +312,11 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Try attacking a valid target
         if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
 
-        // Try picking a valid item(targetItem)
+        // Try picking a valid Item Target
         if (targetSackGameObject) ContinueToMoveToItem();
+
+        // Try run to a valid Npc Target
+        if (targetNpcGameObject) ContinueToMoveToNpc();
 
         // Update Health Player
         UpdateHealthPlayer();
@@ -383,31 +390,34 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         agent.isStopped = false;
         targetMonster = null;
         targetSackGameObject = null;
+        targetNpcGameObject = null;
         isAttacking = false;
         animator.SetBool("meleeAttack", false);
         animator.SetBool("rangeAttack", false);
         animator.SetBool("handAttack", false);
         animator.SetBool("run", false);
-        //Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
     }
 
     private void KeyboardMoveManager()
     {
-        if (directionKeyboard == Vector3.zero && directionMouse == Vector3.zero && moveToTarget == false) animator.SetBool("run", false);
-        if (directionKeyboard != Vector3.zero)
+        if (isFocusedChat == false)
         {
-
-            directionMouse = Vector3.zero;
-            // Deal colliders with Raycast to make transform.Translate able to collids without rigidbody on player
-            if (!Physics.Raycast(transform.position, transform.TransformDirection(directionKeyboard), _colliderDistance))
+            if (directionKeyboard == Vector3.zero && directionMouse == Vector3.zero && moveToTarget == false) animator.SetBool("run", false);
+            if (directionKeyboard != Vector3.zero)
             {
-                // Run Animation On
-                animator.SetBool("handAttack", false);
-                animator.SetBool("meleeAttack", false);
-                animator.SetBool("rangeAttack", false);
-                animator.SetBool("run", true);
-                // Move to none collider position
-                transform.Translate(directionKeyboard * (_speed * Time.deltaTime));
+
+                directionMouse = Vector3.zero;
+                // Deal colliders with Raycast to make transform.Translate able to collids without rigidbody on player
+                if (!Physics.Raycast(transform.position, transform.TransformDirection(directionKeyboard), _colliderDistance))
+                {
+                    // Run Animation On
+                    animator.SetBool("handAttack", false);
+                    animator.SetBool("meleeAttack", false);
+                    animator.SetBool("rangeAttack", false);
+                    animator.SetBool("run", true);
+                    // Move to none collider position
+                    transform.Translate(directionKeyboard * (_speed * Time.deltaTime));
+                }
             }
         }
     }
@@ -455,6 +465,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
                 // This is a unequipped item pick up click
                 if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.CompareTag("Sack")) FirstMoveToSack(hit);
 
+                // This is a click to go to a Npc
+                if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.CompareTag("Npc")) FirstMoveToNpc(hit);
+
             }
 
             // Reset to default cursor
@@ -470,6 +483,14 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetSackGameObject.transform.position - transform.position), 1);
     }
 
+    public void FirstMoveToNpc(RaycastHit hit)
+    {
+        ResetTarget();
+        // Thes conditions matches with ContinueMoveItem in Update()
+        targetNpcGameObject = hit.collider.gameObject;
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetNpcGameObject.transform.position - transform.position), 1);
+    }
+
     public void ContinueToMoveToItem()
     {
         moveToTarget = true;
@@ -477,6 +498,14 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         agent.speed = _speed;
         agent.destination = targetSackGameObject.transform.position;
     }
+    public void ContinueToMoveToNpc()
+    {
+        moveToTarget = true;
+        animator.SetBool("run", true);
+        agent.speed = _speed;
+        agent.destination = targetNpcGameObject.transform.position;
+    }
+
 
     public void ContinueAttack()
     {
@@ -710,7 +739,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void OnMoveKeyboard(InputAction.CallbackContext context)
     {
-        if (canMove)
+        if (canMove && isFocusedChat == false)
         {
             // Reset Attack & Target
             ResetTarget();

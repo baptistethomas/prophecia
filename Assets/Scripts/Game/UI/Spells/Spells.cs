@@ -6,7 +6,7 @@ public class Spells : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.U))
+        if (Input.GetKeyDown(KeyCode.U) && Player.Instance.isFocusedChat == false)
         {
             GameManager.Instance.spellsEnabled = !GameManager.Instance.spellsEnabled;
             GameManager.Instance.CloseUIWindow();
