@@ -145,35 +145,45 @@ public class Monster : MonoBehaviour
         // Extra Rotation
 
         // Check Distance Between the Monster and the Player
-        float distance = Vector3.Distance(transform.position, Player.Instance.transform.position);
+        float distanceFromPlayer = Vector3.Distance(transform.position, Player.Instance.transform.position);
+        float distanceFromInitialPosition = Vector3.Distance(transform.position, initialPosition);
         agent.stoppingDistance = stopDistance;
         // Out Distance Detection
         if (agent != null)
         {
-            if (distance > meleeRange)
+            if (distanceFromPlayer > meleeRange)
             {
                 // Extra Rotate direction change during monster moves
                 if (isMoving == true) ExtraRotation();
 
                 // If the Distance is less than detect distance, the monster move to the player until being in melee range of 2
-                if (distance <= detectDistance)
+                if (distanceFromPlayer <= detectDistance)
                 {
                     agent.destination = Player.Instance.transform.position;
                     animator.SetFloat("runSpeed", 1);
                 }
-                if (agent.remainingDistance < stopDistance)
+                // Pull back the monster if he got pulled to far away
+                if (distanceFromInitialPosition >= walkRadius && distanceFromPlayer >= detectDistance * 2)
                 {
-                    if (timePauseWander + 5 < Time.time)
+                    agent.destination = initialPosition;
+                }
+                // Wander System
+                else
+                {
+                    if (agent.remainingDistance < stopDistance)
                     {
-                        timePauseWander = Time.time;
-                        agent.SetDestination(RandomNavMeshLocation());
-                        animator.SetFloat("runSpeed", 1);
-                        isMoving = true;
-                    }
-                    else
-                    {
-                        animator.SetFloat("runSpeed", 0);
-                        isMoving = false;
+                        if (timePauseWander + 5 < Time.time)
+                        {
+                            timePauseWander = Time.time;
+                            agent.SetDestination(RandomNavMeshLocation());
+                            animator.SetFloat("runSpeed", 1);
+                            isMoving = true;
+                        }
+                        else
+                        {
+                            animator.SetFloat("runSpeed", 0);
+                            isMoving = false;
+                        }
                     }
                 }
             }

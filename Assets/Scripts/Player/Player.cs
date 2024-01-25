@@ -217,6 +217,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     // Player Chat
     [HideInInspector] public bool isFocusedChat;
+    [HideInInspector] public string lastChat;
 
 
     // Unity Functions
@@ -392,6 +393,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         targetSackGameObject = null;
         targetNpcGameObject = null;
         isAttacking = false;
+        canMove = true;
+        canAttack = true;
         animator.SetBool("meleeAttack", false);
         animator.SetBool("rangeAttack", false);
         animator.SetBool("handAttack", false);
@@ -512,6 +515,8 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         // Monster isnt in range, player is moving until being in range
         if (Vector3.Distance(transform.position, targetMonster.transform.position) > weapon.range)
         {
+            directionKeyboard = Vector3.zero;
+            directionMouse = Vector3.zero;
             moveToTarget = true;
             animator.SetBool("run", true);
             agent.speed = _speed;

@@ -28,11 +28,6 @@ public class Inventory : MonoBehaviour
 
         _instance = this;
         //DontDestroyOnLoad(this.gameObject);
-
-    }
-
-    void Start()
-    {
         InitSlots();
     }
 
