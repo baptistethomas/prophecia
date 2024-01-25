@@ -25,7 +25,7 @@ public class MacroBar : MonoBehaviour, IPointerClickHandler
         {
             item.id = 0;
             item.type = string.Empty;
-            item.description = string.Empty;
+            item.descriptionFull = string.Empty;
             item.icon = null;
             item.pickedUp = false;
             item.equipped = false;

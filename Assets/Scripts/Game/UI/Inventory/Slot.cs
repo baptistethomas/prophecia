@@ -114,8 +114,13 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 
                     // Disabled skin mesh from player matching with armor parts
                     if (GameObject.Find(armor.bodyPart)) GameObject.Find(armor.bodyPart).GetComponent<Renderer>().enabled = false;
-                    if (armor.bodyPart == "Chest") GameObject.Find("Arms").GetComponent<Renderer>().enabled = false; // Chest need arms being disabled too
-                    if (armor.bodyPart == "Legs") GameObject.Find("Underwear").GetComponent<Renderer>().enabled = false; // Legs need underwear being disabled too
+                    if (armor.bodyPart == "Chest") Player.Instance.body.transform.Find("Arms").GetComponent<Renderer>().enabled = false; // Chest need arms being disabled too
+                    if (armor.bodyPart == "Legs")
+                    {
+                        // Legs need underwear & legs being disabled too
+                        Player.Instance.accessories.transform.Find("Underwear").GetComponent<Renderer>().enabled = false;
+                        Player.Instance.body.transform.Find("Legs").GetComponent<Renderer>().enabled = false;
+                    }
 
                     // Copy armor part to equiped slot
                     armor.transform.SetParent(armorPartSlot.transform);
@@ -298,6 +303,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 
         // Back to Inventory
         Item item = slotEquiped.transform.GetChild(2).gameObject.GetComponent<Item>();
-        GameManager.Instance.GetComponent<Inventory>().AddItem(item.gameObject, item.id, item.type, item.description, item.icon);
+        GameManager.Instance.GetComponent<Inventory>().AddItem(item.gameObject, item.id, item.type, item.name, item.descriptionShort, item.descriptionFull, item.icon);
     }
 }

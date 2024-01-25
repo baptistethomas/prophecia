@@ -34,7 +34,7 @@ public class Sack : MonoBehaviour
                 if (item.encumbrance < Player.Instance.leftEncumbrance)
                 {
                     GameObject instantiateItem = Instantiate(items[i]);
-                    GameObject.Find("Game Manager").GetComponent<Inventory>().AddItem(instantiateItem, item.id, item.type, item.description, item.icon);
+                    GameObject.Find("Game Manager").GetComponent<Inventory>().AddItem(instantiateItem, item.id, item.type, item.name, item.descriptionShort, item.descriptionFull, item.icon);
                     Player.Instance.currentEncumbrance += item.encumbrance;
                     items.Remove(item.gameObject);
                 }

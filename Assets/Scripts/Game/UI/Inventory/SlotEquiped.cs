@@ -42,8 +42,13 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler
 
                             // Active Skin Mesh
                             if (GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart)) GameObject.Find(slotGameObject.GetComponent<Armor>().bodyPart).GetComponent<Renderer>().enabled = true;
-                            if (slotGameObject.GetComponent<Armor>().bodyPart == "Chest") GameObject.Find("Arms").GetComponent<Renderer>().enabled = true; // Chest need arms being active too
-                            if (slotGameObject.GetComponent<Armor>().bodyPart == "Legs") GameObject.Find("Underwear").GetComponent<Renderer>().enabled = true; // Legs need underwear active disabled too
+                            if (slotGameObject.GetComponent<Armor>().bodyPart == "Chest") Player.Instance.body.transform.Find("Arms").GetComponent<Renderer>().enabled = true; // Chest need arms being active too
+                            if (slotGameObject.GetComponent<Armor>().bodyPart == "Legs")
+                            {
+                                // Legs need underwear active disabled too
+                                Player.Instance.accessories.transform.Find("Underwear").GetComponent<Renderer>().enabled = true;
+                                Player.Instance.body.transform.Find("Legs").GetComponent<Renderer>().enabled = true;
+                            }
 
                             // Disable Slot Equipment
                             GameObject armorSlot = GameObject.Find("Slot_" + slotGameObject.GetComponent<Armor>().bodyPart);
@@ -108,6 +113,6 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler
     private void ResetEquipedSlot(GameObject slotGameObject)
     {
         var item = slotGameObject.transform.GetChild(2).gameObject.GetComponent<Item>();
-        GameManager.Instance.GetComponent<Inventory>().AddItem(slotGameObject.transform.GetChild(2).gameObject, item.id, item.type, item.description, item.icon);
+        GameManager.Instance.GetComponent<Inventory>().AddItem(slotGameObject.transform.GetChild(2).gameObject, item.id, item.type, item.name, item.descriptionShort, item.descriptionFull, item.icon);
     }
 }

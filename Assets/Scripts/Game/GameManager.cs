@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     public bool spellsEnabled;
     public bool optionsEnabled;
     public bool guildEnabled;
+    public bool merchantEnabled;
 
     // GameManager Settings
     public int experienceRate;
@@ -34,7 +35,7 @@ public class GameManager : MonoBehaviour
         }
 
         _instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        //DontDestroyOnLoad(this.gameObject);
     }
     public void CloseUIWindow()
     {
@@ -72,6 +73,12 @@ public class GameManager : MonoBehaviour
         {
             GameObject.Find("Options").SetActive(false);
             optionsEnabled = false;
+        }
+        if (GameObject.Find("Merchant") != null)
+        {
+            GameObject.Find("Merchant").SetActive(false);
+            merchantEnabled = false;
+            Player.Instance.lastChat = null;
         }
     }
 }

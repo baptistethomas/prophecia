@@ -99,14 +99,14 @@ public class Inventory : MonoBehaviour
             Player.Instance.armorClassFinal.ToString();
     }
 
-    public void AddItem(GameObject itemObject, int itemId, string itemType, string itemDescription, Sprite itemIcon)
+    public void AddItem(GameObject itemObject, int itemId, string itemType, string name, string itemDescriptionShort, string itemDescriptionFull, Sprite itemIcon)
     {
         // Look for Stacking First
         for (int i = 0; i < allSlots; i++)
         {
             if (slotContent[i].GetComponent<Slot>().id == itemId)
             {
-                AddItemSlotMapping(itemObject, itemId, itemType, itemDescription, itemIcon, i);
+                AddItemSlotMapping(itemObject, itemId, itemType, name, itemDescriptionShort, itemDescriptionFull, itemIcon, i);
                 return;
             }
         }
@@ -117,13 +117,13 @@ public class Inventory : MonoBehaviour
 
             if (slotContent[i].GetComponent<Slot>().empty)
             {
-                AddItemSlotMapping(itemObject, itemId, itemType, itemDescription, itemIcon, i);
+                AddItemSlotMapping(itemObject, itemId, itemType, name, itemDescriptionShort, itemDescriptionFull, itemIcon, i);
                 return;
             }
         }
     }
 
-    public void AddItemSlotMapping(GameObject itemObject, int itemId, string itemType, string itemDescription, Sprite itemIcon, int i)
+    public void AddItemSlotMapping(GameObject itemObject, int itemId, string itemType, string name, string itemDescriptionShort, string itemDescriptionFull, Sprite itemIcon, int i)
     {
         // Add Item
         itemObject.GetComponent<Item>().pickedUp = true;
@@ -134,7 +134,7 @@ public class Inventory : MonoBehaviour
         slotContent[i].GetComponent<Slot>().icon = itemIcon;
         slotContent[i].GetComponent<Slot>().type = itemType;
         slotContent[i].GetComponent<Slot>().id = itemId;
-        slotContent[i].GetComponent<Slot>().description = itemDescription;
+        slotContent[i].GetComponent<Slot>().description = itemDescriptionFull;
 
         // Changing Slot Image
         if (slotContent[i].transform.Find("Panel"))
@@ -144,7 +144,7 @@ public class Inventory : MonoBehaviour
         }
 
         // Item got sloted on inventory, he is not active anymore
-        itemObject.transform.parent = slotContent[i].transform;
+        itemObject.transform.SetParent(slotContent[i].transform);
         itemObject.SetActive(false);
 
         // Slot isnt avalaible anymore

@@ -219,6 +219,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public bool isFocusedChat;
     [HideInInspector] public string lastChat;
 
+    // Player Skin
+    public GameObject body;
+    public GameObject accessories;
 
     // Unity Functions
 
@@ -233,6 +236,10 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
         _instance = this;
         DontDestroyOnLoad(this.gameObject);
+
+        // Get Body Player
+        GetPlayerBodyGo();
+        GetPlayerAccessoriesGo();
 
     }
 
@@ -342,7 +349,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void CurrentEncumbrance()
     {
-        encumbrance = (Player.Instance.strenghtFinal * 500) / (Player.Instance.strenghtFinal + 100);
+        encumbrance = (strenghtFinal * 500) / (strenghtFinal + 100);
         leftEncumbrance = encumbrance - currentEncumbrance;
     }
 
@@ -882,5 +889,25 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public void GetHitAudio()
     {
         audioSource.PlayOneShot(sfx[4], 0.2f);
+    }
+
+    public void GetPlayerBodyGo()
+    {
+        GameObject meshes = transform.Find("Meshes").gameObject;
+        if (meshes != null)
+        {
+            body = meshes.transform.Find("Body").gameObject;
+
+        }
+    }
+
+    public void GetPlayerAccessoriesGo()
+    {
+        GameObject meshes = transform.Find("Meshes").gameObject;
+        if (meshes != null)
+        {
+            accessories = meshes.transform.Find("Accessories").gameObject;
+
+        }
     }
 }

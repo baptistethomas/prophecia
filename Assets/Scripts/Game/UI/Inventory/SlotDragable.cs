@@ -50,7 +50,9 @@ namespace Assets.Scripts.Game.UI.Inventory
 
                     macroPanel.GetComponent<Item>().id = draggedItem.id;
                     macroPanel.GetComponent<Item>().type = draggedItem.type;
-                    macroPanel.GetComponent<Item>().description = draggedItem.description;
+                    macroPanel.GetComponent<Item>().name = draggedItem.name;
+                    macroPanel.GetComponent<Item>().descriptionShort = draggedItem.descriptionShort;
+                    macroPanel.GetComponent<Item>().descriptionFull = draggedItem.descriptionFull;
                     macroPanel.GetComponent<Item>().icon = draggedItem.icon;
                 }
                 transform.SetParent(parentBeforeDrag);

@@ -3,11 +3,16 @@ using UnityEngine;
 public class Item : MonoBehaviour
 {
     public int id;
+    public GameObject itemGo;
     public string type;
     public int encumbrance;
     public int buyPrice;
     public int sellPrice;
-    public string description;
+    public string name;
+    [TextArea]
+    public string descriptionShort;
+    [TextArea]
+    public string descriptionFull;
     public Sprite icon;
     public bool pickedUp;
     public bool equipped;
