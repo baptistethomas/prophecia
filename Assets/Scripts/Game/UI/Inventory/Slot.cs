@@ -22,48 +22,52 @@ public class Slot : MonoBehaviour, IPointerClickHandler
         // Equip Item on double click inventory slot
         if ((lastClick + interval) > Time.time)
         {
-
-            // Get Item Object from Inventory
-            int slotContentCountChild = transform.childCount;
-            GameObject slotContentGameObject = transform.GetChild(slotContentCountChild - 1).gameObject;
-            Weapon weapon = slotContentGameObject.GetComponent<Weapon>();
-            Armor armor = slotContentGameObject.GetComponent<Armor>();
-
-            // Weapon
-            if (weapon != null)
-            {
-                // Check requirements
-                if (weapon.requiredStrenght > Player.Instance.strenght) return; // To do : Add log message
-                if (weapon.requiredEndurance > Player.Instance.endurance) return; // To do : Add log message
-                if (weapon.requiredDexterity > Player.Instance.dexterity) return; // To do : Add log message
-                if (weapon.requiredIntelect > Player.Instance.intelect) return; // To do : Add log message
-                if (weapon.requiredWisdom > Player.Instance.wisdom) return; // To do : Add log message
-
-                // Equip if requirements are passed
-                EquipWeaponSlot(weapon);
-            }
-
-            // Armor part
-            if (armor != null)
-            {
-                // Check requirements
-                if (armor.requiredStrenght > Player.Instance.strenght) return; // To do : Add log message
-                if (armor.requiredEndurance > Player.Instance.endurance) return; // To do : Add log message
-                if (armor.requiredDexterity > Player.Instance.dexterity) return; // To do : Add log message
-                if (armor.requiredIntelect > Player.Instance.intelect) return; // To do : Add log message
-                if (armor.requiredWisdom > Player.Instance.wisdom) return; // To do : Add log message
-
-                // Equip if requirements are passed
-                EquipArmorSlot(armor);
-            }
-
-            // Reset Player Target
-            Player.Instance.ResetTarget();
+            EquipSlot(this);
         }
         else
         {
             lastClick = Time.time;
         }
+    }
+
+    public void EquipSlot(Slot slot)
+    {
+        // Get Item Object from Inventory
+        int slotContentCountChild = slot.transform.childCount;
+        GameObject slotContentGameObject = slot.transform.GetChild(slotContentCountChild - 1).gameObject;
+        Weapon weapon = slotContentGameObject.GetComponent<Weapon>();
+        Armor armor = slotContentGameObject.GetComponent<Armor>();
+
+        // Weapon
+        if (weapon != null)
+        {
+            // Check requirements
+            if (weapon.requiredStrenght > Player.Instance.strenght) return; // To do : Add log message
+            if (weapon.requiredEndurance > Player.Instance.endurance) return; // To do : Add log message
+            if (weapon.requiredDexterity > Player.Instance.dexterity) return; // To do : Add log message
+            if (weapon.requiredIntelect > Player.Instance.intelect) return; // To do : Add log message
+            if (weapon.requiredWisdom > Player.Instance.wisdom) return; // To do : Add log message
+
+            // Equip if requirements are passed
+            EquipWeaponSlot(weapon);
+        }
+
+        // Armor part
+        if (armor != null)
+        {
+            // Check requirements
+            if (armor.requiredStrenght > Player.Instance.strenght) return; // To do : Add log message
+            if (armor.requiredEndurance > Player.Instance.endurance) return; // To do : Add log message
+            if (armor.requiredDexterity > Player.Instance.dexterity) return; // To do : Add log message
+            if (armor.requiredIntelect > Player.Instance.intelect) return; // To do : Add log message
+            if (armor.requiredWisdom > Player.Instance.wisdom) return; // To do : Add log message
+
+            // Equip if requirements are passed
+            EquipArmorSlot(armor);
+        }
+
+        // Reset Player Target
+        Player.Instance.ResetTarget();
     }
 
     public void EquipArmorSlot(Armor armor)

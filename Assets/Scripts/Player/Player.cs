@@ -220,8 +220,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public string lastChat;
 
     // Player Skin
-    public GameObject body;
-    public GameObject accessories;
+    [HideInInspector] public GameObject body;
+    [HideInInspector] public GameObject accessories;
+    [HideInInspector] public bool isWaitingNpcAnswer;
 
     // Unity Functions
 
@@ -514,6 +515,38 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         animator.SetBool("run", true);
         agent.speed = _speed;
         agent.destination = targetNpcGameObject.transform.position;
+    }
+
+    // Entered NPC collid and said nothing
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Npc")
+        {
+            lastChat = null;
+            isWaitingNpcAnswer = true;
+            other.gameObject.GetComponent<Npc>().isWaitingPlayerAnswer = false;
+        }
+    }
+
+    // In NPC collid and said something
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "Npc" && lastChat != null)
+        {
+            isWaitingNpcAnswer = true;
+            other.gameObject.GetComponent<Npc>().isWaitingPlayerAnswer = false;
+        }
+    }
+
+    // Leaving & reset all the flags
+    private void OnTriggerExit(Collider other)
+    {
+
+        if (other.gameObject.tag == "Npc")
+        {
+            isWaitingNpcAnswer = false;
+            other.gameObject.GetComponent<Npc>().isWaitingPlayerAnswer = false;
+        }
     }
 
 

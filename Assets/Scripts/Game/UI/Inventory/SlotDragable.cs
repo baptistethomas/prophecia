@@ -21,7 +21,6 @@ namespace Assets.Scripts.Game.UI.Inventory
                 transform.Find("Panel").GetComponent<Image>().raycastTarget = false;
             }
             else return;
-
         }
 
         public void OnDrag(PointerEventData eventData)

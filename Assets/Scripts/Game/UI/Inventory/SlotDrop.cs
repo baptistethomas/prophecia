@@ -7,7 +7,10 @@ namespace Assets.Scripts.Game.UI.Inventory
     {
         public void OnDrop(PointerEventData eventData)
         {
-            if (eventData.pointerDrag.GetComponent<Slot>() != null && eventData.pointerDrag.GetComponent<Slot>().item != null) eventData.pointerDrag.GetComponent<SlotDragable>().parentAfterDrag = transform;
+            if (eventData.pointerDrag.GetComponent<Slot>() != null && eventData.pointerDrag.GetComponent<Slot>().item != null)
+            {
+                eventData.pointerDrag.GetComponent<SlotDragable>().parentAfterDrag = transform;
+            }
         }
     }
 }
