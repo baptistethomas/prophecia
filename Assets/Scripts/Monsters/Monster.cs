@@ -13,6 +13,7 @@ public class Monster : MonoBehaviour
 
     // Monster State
     public bool isDead = false;
+    private bool isWaitingForRespawn;
     public bool canAttack = true;
     public GameObject monsterPrefab;
 
@@ -22,16 +23,33 @@ public class Monster : MonoBehaviour
 
     // Monster Stats
     public int health;
-    private bool isWaitingForRespawn;
     public int currentHealth;
-    public int meleeDamage;
+    private int meleeDamage;
     public int damageMin;
     public int damageMax;
-    public float experience;
 
-    // Monster Skills
+    // Monster Elements
+    public int powerLight;
+    public int powerDark;
+    public int powerFire;
+    public int powerEarth;
+    public int powerAir;
+    public int powerWater;
+    public int resistLight;
+    public int resistDark;
+    public int resistFire;
+    public int resistEarth;
+    public int resistAir;
+    public int resistWater;
+
+    // Monster Misc
+    public int level;
     public int attack;
     public int dodge;
+    public int armorClass;
+
+    // Monster XP
+    public float experience;
 
     // Monster Loot
     public int goldMin;
@@ -105,11 +123,7 @@ public class Monster : MonoBehaviour
         if (isDead == false) OnMonsterAlive();
         if (isDead == true)
         {
-            if (isWaitingForRespawn == false)
-            {
-                isWaitingForRespawn = true;
-                OnMonsterDead();
-            }
+            if (isWaitingForRespawn == false) OnMonsterDead();
         }
     }
 
@@ -234,6 +248,9 @@ public class Monster : MonoBehaviour
 
     private void OnMonsterDead()
     {
+        // Flag monster as dead
+        isDead = true;
+
         // Get Gold
         Player.Instance.gold += Random.Range(goldMin, goldMax);
 
@@ -257,10 +274,10 @@ public class Monster : MonoBehaviour
 
         // Die animation and particle
         animator.SetTrigger("died");
+        transform.Find("Canvas").gameObject.SetActive(false);
         agent.isStopped = true;
 
         // Flag as dead, prepair respawn & reset Player's target & nav mash relative to dead monster
-        isDead = true;
         GetComponent<Collider>().enabled = false;
         GetComponent<NavMeshAgent>().enabled = false;
 
@@ -305,6 +322,7 @@ public class Monster : MonoBehaviour
         isWaitingForRespawn = false;
         agent.isStopped = false;
         agent.ResetPath();
+        transform.Find("Canvas").gameObject.SetActive(true);
         childHealthBar.localScale = healthBarLocalSpace;
     }
 
@@ -317,7 +335,7 @@ public class Monster : MonoBehaviour
             canvas = ui.transform.Find("Canvas").gameObject;
             if (canvas != null)
             {
-                GameObject labelMonster = canvas.transform.Find("Label Monster or Npc").gameObject;
+                GameObject labelMonster = canvas.transform.Find("Label Description").gameObject;
                 if (labelMonster != null)
                 {
                     if (!labelMonsterGo)
@@ -327,7 +345,7 @@ public class Monster : MonoBehaviour
                         GameObject backgroundNameMonster = labelMonsterGo.transform.Find("Background").gameObject;
                         if (backgroundNameMonster != null)
                         {
-                            GameObject nameMonster = backgroundNameMonster.transform.Find("Monster or Npc Name").gameObject;
+                            GameObject nameMonster = backgroundNameMonster.transform.Find("Description").gameObject;
                             if (nameMonster != null)
                             {
                                 TextMeshProUGUI labelText = nameMonster.GetComponent<TextMeshProUGUI>();

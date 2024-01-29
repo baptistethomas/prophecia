@@ -1,8 +1,9 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SlotEquiped : MonoBehaviour, IPointerClickHandler, IDropHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+public class SlotEquiped : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IDropHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
 
     public GameObject item;
@@ -20,6 +21,90 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler, IDropHandler, IB
     private Transform initialEquipParent;
     private Vector3 initialEquipPosition;
     private Transform draggedEquipment;
+    private GameObject labelItemGo;
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        GameObject pointerEnteredObject = eventData.pointerEnter.transform.gameObject;
+        if (pointerEnteredObject != null)
+        {
+            if (pointerEnteredObject.name == "Equip")
+            {
+                int slotContentCountChild = eventData.pointerEnter.transform.parent.childCount;
+                if (slotContentCountChild > 0) slotGameObject = eventData.pointerEnter.transform.parent.GetChild(slotContentCountChild - 1).gameObject;
+            }
+            if (pointerEnteredObject.name == "Panel")
+            {
+                int slotContentCountChild = eventData.pointerEnter.transform.parent.childCount;
+                if (slotContentCountChild > 0) slotGameObject = eventData.pointerEnter.transform.parent.GetChild(slotContentCountChild - 1).gameObject;
+            }
+            if (pointerEnteredObject.name != "Equip" && pointerEnteredObject.name! != "Panel")
+            {
+                int slotContentCountChild = eventData.pointerEnter.transform.childCount;
+                if (slotContentCountChild > 0) slotGameObject = eventData.pointerEnter.transform.GetChild(slotContentCountChild - 1).gameObject;
+            }
+        }
+        //Debug.Log(eventData.pointerEnter.transform.gameObject.name);
+        //int slotContentCountChild = eventData.pointerEnter.transform.childCount;
+        //slotGameObject = eventData.pointerEnter.transform.GetChild(slotContentCountChild - 1).gameObject;
+        //Debug.Log(slotGameObject);
+        if (slotGameObject != null && slotGameObject.GetComponent<Item>() != null) ShowDescriptionItem(slotGameObject);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Destroy(labelItemGo);
+    }
+
+    private void ShowDescriptionItem(GameObject itemGameObject)
+    {
+        GameObject ui = GameObject.Find("UI").gameObject;
+
+        if (ui != null)
+        {
+            GameObject canvas = ui.transform.Find("Canvas").gameObject;
+            if (canvas != null)
+            {
+                GameObject labelItem = canvas.transform.Find("Item Description").gameObject;
+                if (labelItem != null)
+                {
+                    if (!labelItemGo)
+                    {
+                        labelItemGo = Instantiate(labelItem, transform.position, Quaternion.identity);
+                        labelItemGo.transform.SetParent(canvas.transform);
+                        labelItemGo.transform.position = new Vector3(transform.position.x, transform.position.y - 125, transform.position.z);
+                        GameObject backgroundItemLabel = labelItemGo.transform.Find("Background").gameObject;
+                        if (backgroundItemLabel != null)
+                        {
+                            GameObject descriptionItem = backgroundItemLabel.transform.Find("Description").gameObject;
+                            if (descriptionItem != null)
+                            {
+                                Item item = itemGameObject.GetComponent<Item>();
+                                if (item != null)
+                                {
+                                    TextMeshProUGUI labelText = descriptionItem.GetComponent<TextMeshProUGUI>();
+                                    labelText.text = DescriptionItemContent(item);
+                                    float scaleFactor = Screen.width / 1920f;
+                                    Vector2 labelTextDimensions = labelText.GetPreferredValues();
+                                    backgroundItemLabel.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(labelTextDimensions.x + 16 * scaleFactor, 200 * scaleFactor);
+                                    labelItemGo.SetActive(true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private string DescriptionItemContent(Item item)
+    {
+        string text =
+            "<smallcaps>" + item.name + "</smallcaps>\n\n" +
+            "<size=\"14\">" + item.descriptionShort + "</size>\n" +
+            "<size=\"14\">Sell price : " + item.sellPrice + "</size>\n";
+        return text;
+    }
 
     public void OnBeginDrag(PointerEventData eventData)
     {

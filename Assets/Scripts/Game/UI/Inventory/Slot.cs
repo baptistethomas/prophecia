@@ -1,9 +1,10 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Image = UnityEngine.UI.Image;
 
-public class Slot : MonoBehaviour, IPointerClickHandler
+public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public GameObject item;
     private GameObject slotContent;
@@ -16,6 +17,69 @@ public class Slot : MonoBehaviour, IPointerClickHandler
     public bool empty;
     private float lastClick = 0;
     private float interval = 0.5f;
+    private GameObject labelItemGo;
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!labelItemGo)
+        {
+            int slotContentCountChild = eventData.pointerEnter.transform.parent.childCount;
+            GameObject slotGameObject = eventData.pointerEnter.transform.parent.GetChild(slotContentCountChild - 1).gameObject;
+            ShowDescriptionItem(slotGameObject.gameObject);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        Destroy(labelItemGo);
+    }
+
+    private void ShowDescriptionItem(GameObject itemGameObject)
+    {
+        GameObject ui = GameObject.Find("UI").gameObject;
+
+        if (ui != null)
+        {
+            GameObject canvas = ui.transform.Find("Canvas").gameObject;
+            if (canvas != null)
+            {
+                GameObject labelItem = canvas.transform.Find("Item Description").gameObject;
+                if (labelItem != null)
+                {
+                    if (!labelItemGo)
+                    {
+                        labelItemGo = Instantiate(labelItem, transform.position, Quaternion.identity);
+                        labelItemGo.transform.SetParent(canvas.transform);
+                        labelItemGo.transform.position = new Vector3(transform.position.x, transform.position.y - 125, transform.position.z);
+                        GameObject backgroundItemLabel = labelItemGo.transform.Find("Background").gameObject;
+                        if (backgroundItemLabel != null)
+                        {
+                            GameObject descriptionItem = backgroundItemLabel.transform.Find("Description").gameObject;
+                            if (descriptionItem != null)
+                            {
+                                Item item = itemGameObject.GetComponent<Item>();
+                                TextMeshProUGUI labelText = descriptionItem.GetComponent<TextMeshProUGUI>();
+                                labelText.text = DescriptionItemContent(item);
+                                float scaleFactor = Screen.width / 1920f;
+                                Vector2 labelTextDimensions = labelText.GetPreferredValues();
+                                backgroundItemLabel.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(labelTextDimensions.x + 16 * scaleFactor, 200 * scaleFactor);
+                                labelItemGo.SetActive(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private string DescriptionItemContent(Item item)
+    {
+        string text =
+            "<smallcaps>" + item.name + "</smallcaps>\n\n" +
+            "<size=\"14\">" + item.descriptionShort + "</size>\n" +
+            "<size=\"14\">Sell price : " + item.sellPrice + "</size>\n";
+        return text;
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -68,6 +132,19 @@ public class Slot : MonoBehaviour, IPointerClickHandler
 
         // Reset Player Target
         Player.Instance.ResetTarget();
+
+        // Reset Slot Status
+        ResetSlot(slot);
+    }
+
+    private void ResetSlot(Slot slot)
+    {
+        slot.item = null;
+        slot.id = 0;
+        slot.type = null;
+        slot.description = null;
+        slot.icon = null;
+        slot.empty = true;
     }
 
     public void EquipArmorSlot(Armor armor)

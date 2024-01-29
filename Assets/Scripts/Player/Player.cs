@@ -212,9 +212,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public AudioClip[] sfx;
     private AudioSource audioSource;
 
-    // Sanctuary
-    private Vector3 sanctuaryPosition;
-
     // Player Chat
     [HideInInspector] public bool isFocusedChat;
     [HideInInspector] public string lastChat;
@@ -702,7 +699,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         audioSource.PlayOneShot(sfx[6], 0.1f);
         GameObject goTeleportParticles = Instantiate(teleportParticles, new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), Quaternion.identity); ;
         Destroy(goTeleportParticles, 2);
-        transform.position = new Vector3(76, 50, 95);
+        transform.position = new Vector3(588, 50, 530);
         GetComponent<NavMeshAgent>().enabled = true;
         GetLostExperienceAndGold();
         currentHealth = 1;
@@ -806,7 +803,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         if (weapon.isMelee) animator.SetBool("meleeAttack", true);
         if (weapon.isRange) animator.SetBool("rangeAttack", true);
         GetNaturalDamageFromAttributes();
-        damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix + naturalDamageFromAttributes;
+        damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix + naturalDamageFromAttributes - targetMonster.armorClass;
         yield return new WaitForSeconds(weapon.frequency);
     }
 
