@@ -44,8 +44,8 @@ public class Inventory : MonoBehaviour
         {
             Player.Instance.animator.SetBool("run", false);
             inventory.SetActive(true);
-            characterStats.SetActive(true);
-            ShowAttributes();
+            if (GameManager.Instance.storageEnabled == false) characterStats.SetActive(true);
+            if (GameManager.Instance.storageEnabled == false) ShowAttributes();
             CurrentCountOfItems();
             CurrentGoldAmount();
             CurrentEncumbrance();

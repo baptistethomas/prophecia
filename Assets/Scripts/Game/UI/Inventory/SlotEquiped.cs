@@ -44,10 +44,6 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
                 if (slotContentCountChild > 0) slotGameObject = eventData.pointerEnter.transform.GetChild(slotContentCountChild - 1).gameObject;
             }
         }
-        //Debug.Log(eventData.pointerEnter.transform.gameObject.name);
-        //int slotContentCountChild = eventData.pointerEnter.transform.childCount;
-        //slotGameObject = eventData.pointerEnter.transform.GetChild(slotContentCountChild - 1).gameObject;
-        //Debug.Log(slotGameObject);
         if (slotGameObject != null && slotGameObject.GetComponent<Item>() != null) ShowDescriptionItem(slotGameObject);
     }
 
@@ -111,8 +107,6 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
         initialEquipParent = transform.Find("Equip").parent;
         initialEquipPosition = transform.Find("Equip").position;
         draggedEquipment = transform.Find("Equip");
-        //draggedEquipment.SetParent(GameObject.Find("Equipement").transform);
-        //transform.SetAsLastSibling();
         transform.GetComponent<CanvasGroup>().alpha = .5f;
         draggedEquipment.GetComponent<Image>().raycastTarget = false;
     }
@@ -124,7 +118,6 @@ public class SlotEquiped : MonoBehaviour, IPointerClickHandler, IPointerEnterHan
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //draggedEquipment.SetParent(initialEquipParent);
         UnEquipSLot();
         transform.GetComponent<CanvasGroup>().alpha = 1;
         draggedEquipment.GetComponent<Image>().raycastTarget = true;

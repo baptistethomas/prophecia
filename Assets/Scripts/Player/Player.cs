@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
@@ -160,8 +162,12 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public Vector3 experienceBarLocalSpace;
     public RectTransform healthBar;
     public Vector3 healthBarLocalSpace;
+    public RectTransform heroHealthBar;
+    public Vector3 heroHealthBarLocalSpace;
     public RectTransform manaBar;
     public Vector3 manaBarLocalSpace;
+    public RectTransform heroManaBar;
+    public Vector3 heroManaBarLocalSpace;
     // Canvas
     public DynamicTextData damageTextData;
 
@@ -181,6 +187,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     private float timeBetweenLeftClickDownAndUp = 0.20f;
     private bool leftClick;
     public bool isAttacking = false;
+    private float timeClickOnMonster;
     public bool canAttack = true;
     public bool canMove = true;
 
@@ -188,6 +195,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public Monster targetMonster;
     [HideInInspector] public GameObject targetSackGameObject;
     [HideInInspector] public GameObject targetNpcGameObject;
+    [HideInInspector] public GameObject targetStorageGameObject;
     public GameObject hitParticles;
     public GameObject teleportParticles;
     public GameObject lootParticles;
@@ -221,6 +229,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     [HideInInspector] public GameObject accessories;
     [HideInInspector] public bool isWaitingNpcAnswer;
 
+    // Player Quest
+    public List<Quest> questInProgressList;
+
     // Unity Functions
 
     void Awake()
@@ -239,10 +250,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         GetPlayerBodyGo();
         GetPlayerAccessoriesGo();
 
-    }
-
-    void Start()
-    {
         // Get Components
         agent = GetComponent<NavMeshAgent>();
         characterController = GetComponent<CharacterController>();
@@ -250,11 +257,16 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         hands = GameObject.Find("Punch");
         audioSource = GetComponent<AudioSource>();
         leveling = GetComponent<Level>();
+    }
 
+    void Start()
+    {
         // Init Cursor & Bars
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
         healthBarLocalSpace = healthBar.localScale;
+        heroHealthBarLocalSpace = heroHealthBar.localScale;
         manaBarLocalSpace = manaBar.localScale;
+        heroManaBarLocalSpace = heroManaBar.localScale;
         experienceBarLocalSpace = experienceBar.localScale;
 
         // Repeat Player Regeneration every second
@@ -300,6 +312,21 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     void Update()
     {
+        // Try attacking a valid target
+        if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
+
+        // Try picking a valid Sack target
+        if (targetSackGameObject) ContinueToMoveToSack();
+
+        // Try picking a valid Sack target
+        if (targetNpcGameObject) ContinueToMoveToNpc();
+
+        // Try picking a valid Storage target
+        if (targetStorageGameObject) ContinueToMoveToStorage();
+
+        // Update Frame Hero
+        UpdateHeroFrame();
+
         // Refresh Attributes, buff & malus care
         CurrentAttributes();
 
@@ -314,15 +341,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
         // Refresh Current Encombrement
         CurrentEncumbrance();
-
-        // Try attacking a valid target
-        if (targetMonster && targetMonster.currentHealth > 0 && isAttacking) ContinueAttack();
-
-        // Try picking a valid Item Target
-        if (targetSackGameObject) ContinueToMoveToItem();
-
-        // Try run to a valid Npc Target
-        if (targetNpcGameObject) ContinueToMoveToNpc();
 
         // Update Health Player
         UpdateHealthPlayer();
@@ -392,14 +410,16 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     public void ResetTarget()
     {
-        agent.ResetPath();
-        agent.isStopped = false;
+        targetStorageGameObject = null;
         targetMonster = null;
         targetSackGameObject = null;
         targetNpcGameObject = null;
+        agent.ResetPath();
+        agent.isStopped = false;
         isAttacking = false;
         canMove = true;
         canAttack = true;
+        moveToTarget = false;
         animator.SetBool("meleeAttack", false);
         animator.SetBool("rangeAttack", false);
         animator.SetBool("handAttack", false);
@@ -415,16 +435,23 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             {
 
                 directionMouse = Vector3.zero;
-                // Deal colliders with Raycast to make transform.Translate able to collids without rigidbody on player
-                if (!Physics.Raycast(transform.position, transform.TransformDirection(directionKeyboard), _colliderDistance))
+                RaycastHit hit;
+                Physics.Raycast(transform.position, transform.TransformDirection(directionKeyboard), out hit, _colliderDistance);
+
+                Ray rayWater = new Ray(transform.position, Vector3.down);
+                if (!Physics.Raycast(rayWater, 50, 4))
                 {
-                    // Run Animation On
-                    animator.SetBool("handAttack", false);
-                    animator.SetBool("meleeAttack", false);
-                    animator.SetBool("rangeAttack", false);
-                    animator.SetBool("run", true);
-                    // Move to none collider position
-                    transform.Translate(directionKeyboard * (_speed * Time.deltaTime));
+                    // There is no collid or this is a available portal or teleport zone
+                    if (hit.collider == false || hit.collider.tag == "Teleport")
+                    {
+                        // Run Animation On
+                        animator.SetBool("handAttack", false);
+                        animator.SetBool("meleeAttack", false);
+                        animator.SetBool("rangeAttack", false);
+                        animator.SetBool("run", true);
+                        // Move to none collider position
+                        transform.Translate(directionKeyboard * (_speed * Time.deltaTime));
+                    }
                 }
             }
         }
@@ -432,12 +459,10 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
 
     private void ForceCameraToBe3DIso()
     {
-        transform.position = new Vector3(transform.position.x, 50, transform.position.z);
         var limitPlayerRotation = transform.localEulerAngles;
         limitPlayerRotation.x = 0;
         limitPlayerRotation.z = 0;
         transform.localEulerAngles = limitPlayerRotation;
-        Camera.main.transform.rotation = Quaternion.Euler(30, 45, 0);
     }
 
     public void LeftClickManager()
@@ -476,6 +501,9 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
                 // This is a click to go to a Npc
                 if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.CompareTag("Npc")) FirstMoveToNpc(hit);
 
+                // This is a click to go to a Storage
+                if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.CompareTag("Storage")) FirstMoveToStorage(hit);
+
             }
 
             // Reset to default cursor
@@ -486,7 +514,6 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public void FirstMoveToSack(RaycastHit hit)
     {
         ResetTarget();
-        // Thes conditions matches with ContinueMoveItem in Update()
         targetSackGameObject = hit.collider.gameObject;
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetSackGameObject.transform.position - transform.position), 1);
     }
@@ -494,24 +521,39 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
     public void FirstMoveToNpc(RaycastHit hit)
     {
         ResetTarget();
-        // Thes conditions matches with ContinueMoveItem in Update()
         targetNpcGameObject = hit.collider.gameObject;
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetNpcGameObject.transform.position - transform.position), 1);
     }
 
-    public void ContinueToMoveToItem()
+    public void FirstMoveToStorage(RaycastHit hit)
+    {
+        ResetTarget();
+        targetStorageGameObject = hit.collider.gameObject;
+        transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetStorageGameObject.transform.position - transform.position), 1);
+    }
+
+    public void ContinueToMoveToSack()
     {
         moveToTarget = true;
-        animator.SetBool("run", true);
+        if (agent.velocity.sqrMagnitude > 0) animator.SetBool("run", true);
         agent.speed = _speed;
         agent.destination = targetSackGameObject.transform.position;
     }
+
     public void ContinueToMoveToNpc()
     {
         moveToTarget = true;
-        animator.SetBool("run", true);
+        if (agent.velocity.sqrMagnitude > 0) animator.SetBool("run", true);
         agent.speed = _speed;
         agent.destination = targetNpcGameObject.transform.position;
+    }
+
+    public void ContinueToMoveToStorage()
+    {
+        moveToTarget = true;
+        if (agent.velocity.sqrMagnitude > 0) animator.SetBool("run", true);
+        agent.speed = _speed;
+        agent.destination = targetStorageGameObject.transform.position;
     }
 
     // Entered NPC collid and said nothing
@@ -546,22 +588,22 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         }
     }
 
-
     public void ContinueAttack()
     {
-        // Monster isnt in range, player is moving until being in range
-        if (Vector3.Distance(transform.position, targetMonster.transform.position) > weapon.range)
+        // Monster isnt in range, player is moving until being in
+        float distanceToMonster = Vector3.Distance(transform.position, targetMonster.transform.position);
+        if (distanceToMonster > weapon.range)
         {
+            //agent.speed = _speed;
+            agent.SetDestination(targetMonster.transform.position);
             directionKeyboard = Vector3.zero;
             directionMouse = Vector3.zero;
             moveToTarget = true;
-            animator.SetBool("run", true);
-            agent.speed = _speed;
-            agent.destination = targetMonster.transform.position;
+            if (agent.velocity.sqrMagnitude > 0) animator.SetBool("run", true);
         }
 
         // Attack confirms the object is a monster and in range
-        if (Vector3.Distance(transform.position, targetMonster.transform.position) <= weapon.range && targetMonster.currentHealth > 0)
+        if (distanceToMonster <= weapon.range && targetMonster.currentHealth > 0)
         {
             // Transform rotation to prepair player to shot forward being tuned in monster direction
             transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetMonster.transform.position - transform.position), 1);
@@ -580,7 +622,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
                     // Move to monster only if monster his behind another collid
                     if (Vector3.Distance(transform.position, targetMonster.transform.position) > Vector3.Distance(transform.position, hit.collider.gameObject.transform.position))
                     {
-                        animator.SetBool("run", true);
+                        if (agent.velocity.sqrMagnitude > 0) animator.SetBool("run", true);
                         agent.destination = targetMonster.transform.position;
                         agent.isStopped = false;
                     }
@@ -610,6 +652,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         hit.collider.TryGetComponent(out Monster target);
         targetMonster = target;
         isAttacking = true;
+        timeClickOnMonster = Time.time;
     }
 
     public void ApplyAttack()
@@ -676,31 +719,46 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         {
             float currentHealthBar = currentHealth / (float)health;
             healthBar.localScale = new Vector3(currentHealthBar * healthBarLocalSpace.x, healthBar.localScale.y, healthBar.localScale.z);
+            heroHealthBar.localScale = new Vector3(currentHealthBar * heroHealthBarLocalSpace.x, heroHealthBar.localScale.y, heroHealthBar.localScale.z);
         }
         if (currentHealth <= 0)
         {
             GetPlayerDeath();
         }
     }
-
+    private void UpdateHeroFrame()
+    {
+        GameObject heroFrame = GameObject.Find("Hero Frame");
+        if (heroFrame != null)
+        {
+            GameObject playerName = heroFrame.transform.Find("Player Name").gameObject;
+            if (playerName != null) playerName.GetComponent<TextMeshProUGUI>().text = pseudo;
+            GameObject levelFrame = heroFrame.transform.Find("Level Frame").gameObject;
+            if (levelFrame != null)
+            {
+                levelFrame.transform.Find("Player Level").GetComponent<TextMeshProUGUI>().text = level.ToString();
+            }
+        }
+    }
     private void UpdateManaPlayer()
     {
         if (currentMana > 0)
         {
             float currentManaBar = currentMana / (float)mana;
             manaBar.localScale = new Vector3(currentManaBar * manaBarLocalSpace.x, manaBar.localScale.y, manaBar.localScale.z);
+            heroManaBar.localScale = new Vector3(currentManaBar * heroManaBarLocalSpace.x, heroManaBar.localScale.y, heroManaBar.localScale.z);
         }
     }
 
     private void GetPlayerDeath()
     {
         ResetTarget();
-        GetComponent<NavMeshAgent>().enabled = false;
+        agent.enabled = false;
         audioSource.PlayOneShot(sfx[6], 0.1f);
-        GameObject goTeleportParticles = Instantiate(teleportParticles, new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), Quaternion.identity); ;
-        Destroy(goTeleportParticles, 2);
+        //GameObject goTeleportParticles = Instantiate(teleportParticles, new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), Quaternion.identity); ;
+        //Destroy(goTeleportParticles, 2);
         transform.position = new Vector3(588, 50, 530);
-        GetComponent<NavMeshAgent>().enabled = true;
+        agent.enabled = true;
         GetLostExperienceAndGold();
         currentHealth = 1;
         return;
@@ -762,17 +820,22 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             if (directionMouse != Vector3.zero)
             {
                 directionKeyboard = Vector3.zero;
-                // Deal colliders with Raycast to make transform.Translate able to collids without rigidbody on player
-                if (!Physics.Raycast(transform.position, transform.TransformDirection(directionMouse), _colliderDistance))
+                RaycastHit hit;
+                Physics.Raycast(transform.position, transform.TransformDirection(directionMouse), out hit, _colliderDistance);
+                // There is no collid or this is a available portal or teleport zone
+                Ray rayWater = new Ray(transform.position, Vector3.down);
+                if (!Physics.Raycast(rayWater, 50, 4))
                 {
-                    // Run Animation On
-                    animator.SetBool("meleeAttack", false);
-                    animator.SetBool("rangeAttack", false);
-                    animator.SetBool("handAttack", false);
-                    animator.SetBool("run", true);
-                    // Move to none collider position
-                    transform.Translate(directionMouse * (_speed * Time.deltaTime));
-
+                    if (hit.collider == false || hit.collider.tag == "Teleport")
+                    {
+                        // Run Animation On
+                        animator.SetBool("meleeAttack", false);
+                        animator.SetBool("rangeAttack", false);
+                        animator.SetBool("handAttack", false);
+                        animator.SetBool("run", true);
+                        // Move to none collider position
+                        transform.Translate(directionMouse * (_speed * Time.deltaTime));
+                    }
                 }
             }
 
@@ -805,6 +868,11 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
         GetNaturalDamageFromAttributes();
         damage = Random.Range(weapon.damageMin, weapon.damageMax) + weapon.damageFix + naturalDamageFromAttributes - targetMonster.armorClass;
         yield return new WaitForSeconds(weapon.frequency);
+    }
+
+    IEnumerator IFollowTarget()
+    {
+        yield return new WaitForSeconds(0.2f);
     }
 
     public void HitAttack()
@@ -878,7 +946,7 @@ public class Player : MonoBehaviour, Controls.IPlayerActions
             destination.y += (Random.value + 5) / 3;
             destination.z += (Random.value - 0.5f) / 3;
 
-            DynamicTextManager.CreateText(destination, "Dodged!", data);
+            DynamicTextManager.CreateText(destination, "Missed", data);
         }
     }
 

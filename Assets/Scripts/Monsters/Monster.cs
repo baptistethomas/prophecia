@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 using Cursor = UnityEngine.Cursor;
 using Random = UnityEngine.Random;
 
@@ -12,6 +13,7 @@ public class Monster : MonoBehaviour
 {
 
     // Monster State
+    public int id;
     public bool isDead = false;
     private bool isWaitingForRespawn;
     public bool canAttack = true;
@@ -67,6 +69,7 @@ public class Monster : MonoBehaviour
     public DynamicTextData damageTextData;
     public RectTransform healthBar;
     private Transform childHealthBar;
+    private Transform childHealthBarBorder;
     public Vector3 healthBarLocalSpace;
     private Transform[] allChildObjetcs;
     private Transform childHealthBarContainer;
@@ -91,6 +94,7 @@ public class Monster : MonoBehaviour
     private bool isMoving;
     private GameObject labelMonsterGo;
     private GameObject canvas;
+    private bool isMouseOver;
 
     private void Awake()
     {
@@ -98,8 +102,13 @@ public class Monster : MonoBehaviour
         initialRotation = transform.rotation;
         allChildObjetcs = GetComponentsInChildren<Transform>();
         childHealthBarContainer = allChildObjetcs.Where(k => k.gameObject.name == "Health Bar").FirstOrDefault();
+        childHealthBarBorder = allChildObjetcs.Where(k => k.gameObject.name == "Health Bar Border").FirstOrDefault();
         childHealthBar = allChildObjetcs.Where(k => k.gameObject.name == "Health").FirstOrDefault();
         healthBarLocalSpace = childHealthBar.localScale;
+
+        // Turn off canvas HP by default
+        childHealthBarBorder.GetComponent<Image>().enabled = false;
+        childHealthBar.GetComponent<Image>().enabled = false;
     }
 
 
@@ -140,18 +149,25 @@ public class Monster : MonoBehaviour
         randomPosition += transform.position;
         if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, walkRadius, 1))
         {
-            if (Vector3.Distance(hit.position, initialPosition) <= walkRadius)
+            if (Vector3.Distance(initialPosition, hit.position) <= walkRadius)
             {
-                finalPosition = hit.position;
+                RaycastHit hitObstacle;
+                Physics.Raycast(transform.position, (hit.position - transform.position), out hitObstacle);
+                finalPosition = randomPosition;
+                if (agent.remainingDistance >= agent.stoppingDistance + 0.25f)
+                {
+                    animator.SetFloat("runSpeed", 1);
+                    isMoving = true;
+                    timePauseWander = Time.time;
+                }
+                else
+                {
+                    animator.SetFloat("runSpeed", 0);
+                    isMoving = false;
+                }
             }
         }
         return finalPosition;
-    }
-
-    private void ExtraRotation()
-    {
-        Vector3 lookrotation = agent.steeringTarget - transform.position;
-        if (lookrotation != Vector3.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookrotation), 100 * Time.deltaTime);
     }
 
     private void OnMonsterAlive()
@@ -161,42 +177,41 @@ public class Monster : MonoBehaviour
         // Check Distance Between the Monster and the Player
         float distanceFromPlayer = Vector3.Distance(transform.position, Player.Instance.transform.position);
         float distanceFromInitialPosition = Vector3.Distance(transform.position, initialPosition);
+        Vector3 wanderDestination = RandomNavMeshLocation();
         agent.stoppingDistance = stopDistance;
+
         // Out Distance Detection
         if (agent != null)
         {
+            if (agent.velocity.sqrMagnitude > 0) animator.SetFloat("runSpeed", 1);
             if (distanceFromPlayer > meleeRange)
             {
                 // Extra Rotate direction change during monster moves
-                if (isMoving == true) ExtraRotation();
+                if (isMoving == true) transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(agent.destination - transform.position), Time.deltaTime * 2.5f);
 
                 // If the Distance is less than detect distance, the monster move to the player until being in melee range of 2
-                if (distanceFromPlayer <= detectDistance)
+                if (distanceFromPlayer < detectDistance || (Player.Instance.targetMonster == this && Player.Instance.weapon.isRange))
                 {
                     agent.destination = Player.Instance.transform.position;
-                    animator.SetFloat("runSpeed", 1);
+                    //animator.SetFloat("runSpeed", 1);
                 }
                 // Pull back the monster if he got pulled to far away
-                if (distanceFromInitialPosition >= walkRadius && distanceFromPlayer >= detectDistance * 2)
+                else if (distanceFromInitialPosition > walkRadius && distanceFromPlayer > detectDistance * 5)
                 {
                     agent.destination = initialPosition;
+                    //animator.SetFloat("runSpeed", 1);
                 }
                 // Wander System
                 else
                 {
-                    if (agent.remainingDistance < stopDistance)
+                    if (wanderDestination != Vector3.zero)
                     {
-                        if (timePauseWander + 5 < Time.time)
+                        if (timePauseWander + 5 <= Time.time)
                         {
                             timePauseWander = Time.time;
-                            agent.SetDestination(RandomNavMeshLocation());
-                            animator.SetFloat("runSpeed", 1);
+                            agent.SetDestination(wanderDestination);
+                            //animator.SetFloat("runSpeed", 1);
                             isMoving = true;
-                        }
-                        else
-                        {
-                            animator.SetFloat("runSpeed", 0);
-                            isMoving = false;
                         }
                     }
                 }
@@ -213,7 +228,7 @@ public class Monster : MonoBehaviour
                     if (Random.Range(1, attack) >= Random.Range(1, Player.Instance.dodgeFinal))
                     {
                         meleeDamage = Random.Range(damageMin, damageMax) - (int)(Player.Instance.armorClassFinal);
-                        if (Player.Instance.currentHealth > 0)
+                        if (Player.Instance.currentHealth > 0 && meleeDamage > 0)
                         {
                             Player.Instance.currentHealth -= meleeDamage;
                             Player.Instance.GetHitAudio();
@@ -226,9 +241,9 @@ public class Monster : MonoBehaviour
                             destination.z += (Random.value - 0.5f) / 3;
 
                             DynamicTextManager.CreateText(destination, "-" + meleeDamage.ToString(), data);
+                            StartCoroutine("AttackHitThePlayer");
                         }
 
-                        StartCoroutine("AttackHitThePlayer");
                     }
                     else
                     {
@@ -239,7 +254,7 @@ public class Monster : MonoBehaviour
                         destination.y += (Random.value + 12) / 3;
                         destination.z += (Random.value - 0.5f) / 3;
 
-                        DynamicTextManager.CreateText(destination, "Dodged!", data);
+                        DynamicTextManager.CreateText(destination, "Dodged", data);
                     }
                 }
             }
@@ -255,6 +270,7 @@ public class Monster : MonoBehaviour
         Player.Instance.gold += Random.Range(goldMin, goldMax);
 
         // Get Back default attacks state
+        if (Player.Instance.targetMonster == this) Player.Instance.targetMonster = null;
         Player.Instance.isAttacking = false;
         Player.Instance.canAttack = true;
 
@@ -286,6 +302,15 @@ public class Monster : MonoBehaviour
         // Get Back default cursor
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CustomCursor.Instance.cursorMode);
 
+        // Check if the monster is part of quest kill monster
+        foreach (var quest in Player.Instance.questInProgressList)
+        {
+            if (quest.category == Quest.ECategory.killMonster && quest.monsterToKill.GetComponent<Monster>().id == this.id && quest.status == Quest.EStatus.accepted)
+            {
+                quest.monsterKilledCount += 1;
+            }
+        }
+
         // Reset Target
         Player.Instance.ResetTarget();
 
@@ -293,6 +318,16 @@ public class Monster : MonoBehaviour
 
     private void UpdateCanvasHealthMonster()
     {
+        if (Player.Instance.targetMonster == this)
+        {
+            childHealthBarBorder.GetComponent<Image>().enabled = true;
+            childHealthBar.GetComponent<Image>().enabled = true;
+        }
+        if (Player.Instance.targetMonster != this && !isMouseOver)
+        {
+            childHealthBarBorder.GetComponent<Image>().enabled = false;
+            childHealthBar.GetComponent<Image>().enabled = false;
+        }
         if (childHealthBarContainer)
             childHealthBarContainer.transform.rotation = Quaternion.Euler(0, 45, 0);
         if (childHealthBar.localScale.x > 0.1)
@@ -322,6 +357,7 @@ public class Monster : MonoBehaviour
         isWaitingForRespawn = false;
         agent.isStopped = false;
         agent.ResetPath();
+        agent.destination = initialPosition;
         transform.Find("Canvas").gameObject.SetActive(true);
         childHealthBar.localScale = healthBarLocalSpace;
     }
@@ -382,6 +418,9 @@ public class Monster : MonoBehaviour
     {
         if (isDead == false)
         {
+            isMouseOver = true;
+            childHealthBarBorder.GetComponent<Image>().enabled = true;
+            childHealthBar.GetComponent<Image>().enabled = true;
             if (Player.Instance.weapon.isHand) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
             if (Player.Instance.weapon.isMelee) Cursor.SetCursor(CustomCursor.Instance.cursorMeleeAttack, Vector2.zero, CursorMode.Auto);
             if (Player.Instance.weapon.isRange) Cursor.SetCursor(CustomCursor.Instance.cursorRangeAttack, Vector2.zero, CursorMode.Auto);
@@ -390,6 +429,9 @@ public class Monster : MonoBehaviour
     }
     private void OnMouseExit()
     {
+        isMouseOver = false;
+        childHealthBarBorder.GetComponent<Image>().enabled = false;
+        childHealthBar.GetComponent<Image>().enabled = false;
         Cursor.SetCursor(CustomCursor.Instance.cursorDefault, Vector2.zero, CursorMode.Auto);
     }
 

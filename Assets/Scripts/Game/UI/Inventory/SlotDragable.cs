@@ -15,7 +15,8 @@ namespace Assets.Scripts.Game.UI.Inventory
             {
                 parentBeforeDrag = transform.parent;
                 parentAfterDrag = transform.parent;
-                transform.SetParent(GameObject.Find("Equipement").transform);
+                if (GameManager.Instance.storageEnabled == false) transform.SetParent(GameObject.Find("Equipement").transform);
+                if (GameManager.Instance.storageEnabled == true) transform.SetParent(GameObject.Find("Storage").transform);
                 transform.SetAsLastSibling();
                 transform.GetComponent<CanvasGroup>().alpha = .5f;
                 transform.Find("Panel").GetComponent<Image>().raycastTarget = false;
@@ -65,6 +66,32 @@ namespace Assets.Scripts.Game.UI.Inventory
                     GameObject slotContentToSwap = parentAfterDrag.GetChild(0).gameObject;
                     slotContentToSwap.transform.SetParent(parentBeforeDrag);
                     slotContentToSwap.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;
+
+                    // We add or sub encumbrance depending it's storage to inventory or inventory to storage
+                    string parentBeforeDragRootObjectName = parentBeforeDrag.transform.parent.transform.parent.transform.parent.gameObject.name;
+                    string parentAfterDragRootObjectName = parentAfterDrag.transform.parent.transform.parent.transform.parent.gameObject.name;
+
+                    int countItem = transform.childCount - 2;
+                    GameObject itemGameObject = transform.GetChild(transform.childCount - 1).gameObject;
+
+                    // This is Inventory to Storage, so we sub encumbrance of items moved
+                    if (parentBeforeDragRootObjectName == "Inventory" && parentAfterDragRootObjectName == "Storage")
+                    {
+                        Player.Instance.currentEncumbrance -= (itemGameObject.GetComponent<Item>().encumbrance * countItem);
+                    }
+                    // This is Storage to Inventory, so we add encumbrance of items moved
+                    if (parentBeforeDragRootObjectName == "Storage" && parentAfterDragRootObjectName == "Inventory")
+                    {
+                        if (Player.Instance.leftEncumbrance >= (itemGameObject.GetComponent<Item>().encumbrance * countItem))
+                        {
+                            Player.Instance.currentEncumbrance += (itemGameObject.GetComponent<Item>().encumbrance * countItem);
+                        }
+                        else
+                        {
+                            Debug.Log("Too Heavy Exception");
+                        }
+                    }
+
                 }
             }
             transform.GetComponent<RectTransform>().anchoredPosition = Vector3.zero;

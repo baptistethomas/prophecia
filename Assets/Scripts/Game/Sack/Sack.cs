@@ -6,7 +6,7 @@ public class Sack : MonoBehaviour
 
     [SerializeField]
     public List<GameObject> items;
-    private bool itemHasBeenClicked;
+    private bool sackHasBeenClicked;
 
     private void OnMouseOver()
     {
@@ -20,13 +20,13 @@ public class Sack : MonoBehaviour
 
     private void OnMouseDown()
     {
-        itemHasBeenClicked = true;
+        sackHasBeenClicked = true;
     }
 
     private void OnTriggerStay(Collider other)
     {
 
-        if (other.name == "Player" && itemHasBeenClicked == true)
+        if (other.name == "Player" && sackHasBeenClicked == true && Player.Instance.targetSackGameObject)
         {
             for (int i = 0; i < items.Count; i++)
             {

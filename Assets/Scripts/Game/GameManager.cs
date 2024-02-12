@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
 
     // Inventory, Character Sheets & Others UI Windows
     public bool inventoryEnabled;
+    public bool storageEnabled;
     public bool characterSheetEnabled;
     public bool groupEnabled;
     public bool macroEnabled;
@@ -42,6 +43,12 @@ public class GameManager : MonoBehaviour
         if (GameObject.Find("Inventory") != null)
         {
             GameObject.Find("Inventory").SetActive(false);
+            inventoryEnabled = false;
+        }
+        if (GameObject.Find("Storage") != null)
+        {
+            GameObject.Find("Storage").SetActive(false);
+            storageEnabled = false;
             inventoryEnabled = false;
         }
         if (GameObject.Find("Character Sheet") != null)
